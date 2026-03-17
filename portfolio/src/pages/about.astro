@@ -1,0 +1,116 @@
+---
+import ContactCTA from '../components/ContactCTA.astro';
+import Hero from '../components/Hero.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const lang = "zh-CN";
+---
+
+<BaseLayout title="关于我 | 裕涵" description="About Jeanine White Lorem Ipsum">
+	<div class="stack gap-20">
+		<main class="wrapper about">
+			<Hero
+				title="关于我"
+				tagline="Dream it possible"
+			>
+				<img
+					width="1553"
+					height="873"
+					src="/assets/at-work.jpg"
+					alt="个人工作照片"
+				/>
+			</Hero>
+
+			<section>
+				<h2 class="section-title">简介</h2>
+				<div class="content">
+					<p>
+					我是裕涵，也可以叫我Yohann。我今年25岁。
+					我本科就读于南京航空航天大学交通运输专业，机场运行与管理方向。我曾是学校模拟飞行俱乐部/兴趣小组的创办人。
+					</p>
+					<p>
+					大学毕业后不久，我到澳大利亚参加飞行培训项目，13个月完成了理论和飞行课程。目前我持有CASA颁发的商用飞行员执照（CPL），拥有多发等级和仪表等级。训练累计飞行时间239小时，主要机型为DA40NG和DA42VI。
+					</p>
+					<p>
+					我能较流利使用英语。大学期间取得雅思学术类8.0分。航校训练期间取得CASA认证ICAO AELP 6级。
+					</p>
+					<p>
+					我的优势很简单：我愿意学习，遇到不懂的会主动求解，每次飞行后自我反思，业余时间也喜欢飞机相关内容。更重要的，我习惯“按章办事”的风格，出了问题无论大小，该报告的报告。教员们评价我准备充分、纪律性强。
+					</p>
+				</div>
+			</section>
+			<section>
+				<h2 class="section-title">院校</h2>
+				<div class="content">
+					<p>南京航空航天大学 民航学院</p>
+				</div>
+			</section>
+			<section>
+				<h2 class="section-title">技能</h2>
+				<div class="content">
+					<p>商用飞行执照; 雅思(学术类)8.0; 计算机专业基础</p>
+				</div>
+			</section>
+		</main>
+
+		<ContactCTA />
+	</div>
+</BaseLayout>
+
+<style>
+	.about {
+		display: flex;
+		flex-direction: column;
+		gap: 3.5rem;
+	}
+
+	img {
+		margin-top: 1.5rem;
+		border-radius: 1.5rem;
+		box-shadow: var(--shadow-md);
+	}
+
+	section {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		color: var(--gray-200);
+	}
+
+	.section-title {
+		grid-column-start: 1;
+		font-size: var(--text-xl);
+		color: var(--gray-0);
+	}
+
+	.content {
+		grid-column: 2 / 4;
+	}
+
+	.content :global(a) {
+		text-decoration: 1px solid underline transparent;
+		text-underline-offset: 0.25em;
+		transition: text-decoration-color var(--theme-transition);
+	}
+
+	.content :global(a:hover),
+	.content :global(a:focus) {
+		text-decoration-color: currentColor;
+	}
+
+	@media (min-width: 50em) {
+		.about {
+			display: grid;
+			grid-template-columns: 1fr 60% 1fr;
+		}
+
+		.about > :global(:first-child) {
+			grid-column-start: 2;
+		}
+
+		section {
+			display: contents;
+			font-size: var(--text-lg);
+		}
+	}
+</style>
