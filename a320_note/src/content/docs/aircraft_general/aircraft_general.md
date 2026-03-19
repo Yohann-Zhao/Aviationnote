@@ -1,5 +1,5 @@
 ---
-title: Aircraft General Presentation
+title: Aircraft General
 description: A320 Aircraft General Presentation
 ---
 

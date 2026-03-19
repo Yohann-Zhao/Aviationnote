@@ -16,7 +16,7 @@ export default defineConfig({
 				// English docs in `src/content/docs/`
 				root: {
 					label: 'English',
-					lang: 'en',
+					lang: 'en',//这里要小写cn
 				},
 				// zh-CN docs in `src/content/docs/zh-CN/`
 				'zh-cn': { //这里要小写cn
@@ -26,11 +26,23 @@ export default defineConfig({
 			},
 			sidebar: [
 				{
-					label: 'Aircraft General Presentation',
+					label: 'Aircraft General',
 					translations: {
-						'zh-cn': '飞机总体介绍',
+						'zh-CN': '飞机总体介绍',//这里要大写CN
 					},
-					autogenerate: { directory: 'aircraft_general_presentation' },
+					items: [
+						{ label: 'Aircraft General', translations: { 'zh-CN': '飞机总体介绍' }, link: '/aircraft_general/aircraft_general' },
+					],
+				},
+				{
+					label: 'Navigation System',
+					translations: {
+						'zh-CN': '导航系统',//这里要大写CN
+					},
+					items: [
+						{ label: 'Navigation MSU', translations: { 'zh-CN': '导航MSU' }, badge: { text: 'In Progress', variant: 'caution' }, link: '/navigation_system/navigation_msu' },
+						{ label: 'Navigation ADIRS', translations: { 'zh-CN': '导航ADIRS' },  badge: { text: 'In Progress', variant: 'caution' }, link: '/navigation_system/navigation_adirs' },
+					],
 				},
 			],
 		}),
