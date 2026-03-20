@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+/* 
+ * 启用 class 驱动的 dark 变体：
+ * 当 html 上有 `dark` 类时，`dark:*` 样式生效。
+ * 新手提示：你可以把 `.dark` 改成 `.theme-dark`，但需要同步修改 JS。
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * 控制浏览器原生控件（表单/滚动条）在亮暗模式下的基色。
+ * `:root.dark` 对应 html.dark。
+ */
+:root {
+	color-scheme: light;
+}
+
+:root.dark {
+	color-scheme: dark;
+}

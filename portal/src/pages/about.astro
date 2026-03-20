@@ -1,0 +1,62 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+const pageTitle = "About";
+
+/**
+ * 样式参数说明
+ * - `md:grid-cols-[1.4fr_1fr]`: 两列比例布局，左侧文字更宽，右侧信息卡更紧凑。
+ * - `text-sm uppercase tracking-[0.12em]`: 标签风格小标题，弱化但有层次。
+ * - `underline-offset-4`: 链接下划线与文字拉开距离，视觉更精致。
+ * - `dark:bg-slate-900`: 暗色面板底色，保持统一“深灰”而非纯黑。
+ */
+const ui = {
+	title: "text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl dark:text-slate-100",
+	lead: "mt-3 text-base leading-7 text-slate-600 dark:text-slate-300",
+	layout: "mt-8 grid gap-4 md:grid-cols-[1.4fr_1fr]",
+	panel: "rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900",
+	text: "mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300"
+};
+---
+
+<BaseLayout pageTitle={pageTitle}>
+	<!-- About 页面：项目介绍 + 个人介绍图文 + 个人主页链接 -->
+	<section>
+		<h1 class={ui.title}>About AviationNote</h1>
+		<p class={ui.lead}>
+			AviationNote documents study notes, tool references, and learning experiences from an ongoing aviation
+			training journey.
+		</p>
+	</section>
+
+	<section class={ui.layout}>
+		<article class={ui.panel}>
+			<p class="text-sm font-medium uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">Project</p>
+			<h2 class="mt-2 text-xl font-semibold text-slate-900 dark:text-slate-100">
+				A practical notebook for aviation learning
+			</h2>
+			<p class={ui.text}>
+				The project focuses on clarity and reuse: content is organized so each topic can be reviewed quickly
+				before classes, simulator sessions, or exams.
+			</p>
+			<p class={ui.text}>
+				As the site grows, this page can also include development notes, content policy, and source
+				attribution details.
+			</p>
+		</article>
+
+		<aside class={ui.panel}>
+			<p class="text-sm font-medium uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">Author</p>
+			<h2 class="mt-2 text-lg font-semibold text-slate-900 dark:text-slate-100">Yohann Zhao</h2>
+			<p class={ui.text}>
+				Aviation enthusiast and builder of this project, with a focus on turning scattered knowledge into a
+				stable personal learning system.
+			</p>
+			<a
+				href="https://yohannzhao.netlify.app"
+				class="mt-4 inline-flex rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 underline decoration-slate-300 underline-offset-4 transition-colors hover:border-slate-400 hover:text-slate-900 dark:border-slate-700 dark:text-slate-200 dark:decoration-slate-600 dark:hover:border-slate-500 dark:hover:text-slate-100"
+			>
+				Visit Personal Website
+			</a>
+		</aside>
+	</section>
+</BaseLayout>

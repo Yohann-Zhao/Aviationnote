@@ -1,0 +1,39 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+const { pageTitle } = Astro.props;
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+    	<title>{pageTitle} | Aviation Note</title>
+		<script is:inline>
+			/*
+			 * 主题初始化（防止页面先亮后暗的闪烁）：
+			 * 1) localStorage.theme = "dark" 或 "light" 时优先使用用户选择
+			 * 2) 没有手动设置时，跟随系统 `prefers-color-scheme`
+			 */
+			(() => {
+				const stored = localStorage.getItem("theme");
+				const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+				const shouldUseDark = stored ? stored === "dark" : prefersDark;
+				document.documentElement.classList.toggle("dark", shouldUseDark);
+			})();
+		</script>
+	</head>
+	<body class="min-h-screen bg-slate-50 text-slate-800 antialiased dark:bg-slate-950 dark:text-slate-200">
+		<div class="flex min-h-screen flex-col">
+			<Header />
+			<main class="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+				<slot />
+			</main>
+			<Footer />
+		</div>
+	</body>
+</html>

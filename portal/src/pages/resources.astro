@@ -1,0 +1,66 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+const pageTitle = "Resources";
+
+/**
+ * 样式参数说明
+ * - `lg:grid-cols-3`: 大屏三列展示工具卡片，信息密度更高。
+ * - `rounded-xl`: 资源按钮的小圆角；如需更硬朗可改为 `rounded-lg`。
+ * - `bg-slate-100 text-slate-700`: 亮色弱强调按钮，克制不抢眼。
+ * - `dark:bg-slate-800 dark:text-slate-200`: 暗色按钮灰阶对比，保持可读性。
+ * - `transition-colors`: 只做颜色动画，简洁且性能友好。
+ */
+const ui = {
+	title: "text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl dark:text-slate-100",
+	lead: "mt-3 max-w-3xl text-base leading-7 text-slate-600 dark:text-slate-300",
+	grid: "mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3",
+	card: "rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900",
+	cardTitle: "text-base font-semibold text-slate-900 dark:text-slate-100",
+	cardText: "mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300",
+	link: "mt-4 inline-flex rounded-xl bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200 hover:text-slate-900 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 dark:hover:text-slate-100"
+};
+---
+
+<BaseLayout pageTitle={pageTitle}>
+	<!-- Resources 页面：后续扩展为呼号练习、E6B风三角、常用工具网站、学习资源合集 -->
+	<section>
+		<h1 class={ui.title}>Resources</h1>
+		<p class={ui.lead}>
+			A compact catalog of aviation tools and references. Start with practical utilities, then expand into a
+			curated resource index.
+		</p>
+	</section>
+
+	<section class={ui.grid}>
+		<article class={ui.card}>
+			<h2 class={ui.cardTitle}>Call Sign Practice</h2>
+			<p class={ui.cardText}>A quick drill space for ICAO call sign recognition and readback fluency.</p>
+			<a class={ui.link} href="#">Add Tool</a>
+		</article>
+		<article class={ui.card}>
+			<h2 class={ui.cardTitle}>E6B Wind Triangle</h2>
+			<p class={ui.cardText}>Solve wind correction angle, groundspeed, and heading adjustments efficiently.</p>
+			<a class={ui.link} href="#">Add Tool</a>
+		</article>
+		<article class={ui.card}>
+			<h2 class={ui.cardTitle}>ATC Phraseology</h2>
+			<p class={ui.cardText}>Reference links for standard phraseology and operational communication examples.</p>
+			<a class={ui.link} href="#">Add Collection</a>
+		</article>
+		<article class={ui.card}>
+			<h2 class={ui.cardTitle}>Meteorology References</h2>
+			<p class={ui.cardText}>Useful weather interpretation and flight planning resources in one place.</p>
+			<a class={ui.link} href="#">Add Links</a>
+		</article>
+		<article class={ui.card}>
+			<h2 class={ui.cardTitle}>Regulation Library</h2>
+			<p class={ui.cardText}>Organize rulebooks and regional guidance by certificate level or operation type.</p>
+			<a class={ui.link} href="#">Add Documents</a>
+		</article>
+		<article class={ui.card}>
+			<h2 class={ui.cardTitle}>General Utility Hub</h2>
+			<p class={ui.cardText}>Collect frequently used sites such as unit converters and chart viewers.</p>
+			<a class={ui.link} href="#">Add Utilities</a>
+		</article>
+	</section>
+</BaseLayout>
