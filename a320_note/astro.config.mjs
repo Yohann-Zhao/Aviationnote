@@ -40,8 +40,18 @@ export default defineConfig({
 						'zh-CN': '导航系统',//这里要大写CN
 					},
 					items: [
-						{ label: 'Navigation MSU', translations: { 'zh-CN': '导航MSU' }, badge: { text: 'In Progress', variant: 'caution' }, link: '/navigation_system/navigation_msu' },
-						{ label: 'Navigation ADIRS', translations: { 'zh-CN': '导航ADIRS' },  badge: { text: 'In Progress', variant: 'caution' }, link: '/navigation_system/navigation_adirs' },
+						{ label: 'Navigation ADIRS', translations: { 'zh-CN': '导航ADIRS' }, link: '/navigation_system/navigation_adirs' },
+						{ label: 'Navigation MSU', translations: { 'zh-CN': '导航MSU' }, link: '/navigation_system/navigation_msu' },
+					],
+				},
+				{
+					label: 'EIS ECAM',
+					translations: {
+						'zh-CN': 'EIS ECAM',//这里要大写CN
+					},
+					items: [
+						{ label: 'EIS', translations: { 'zh-CN': 'EIS' }, link: '/eis_ecam/eis' },
+						{ label: 'ECAM', translations: { 'zh-CN': 'ECAM' },  badge: { text: 'In Progress', variant: 'caution' }, link: '/eis_ecam/ecam_system' },
 					],
 				},
 			],
