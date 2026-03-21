@@ -1,22 +1,104 @@
 ---
-import Navigation from './Navigation.astro';
+import Navigation from "./Navigation.astro";
 ---
 
-<header class="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/85">
-	<div class="mx-auto flex w-full max-w-6xl items-center px-4 py-4 sm:px-6 lg:px-8">
-		<div class="mr-8 min-w-fit">
-			<a href="/" class="text-sm font-semibold tracking-wide text-slate-900 dark:text-slate-100">AviationNote</a>
-		</div>
-		<nav class="w-full">
+<header class="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/85">
+	<div class="mx-auto flex w-full max-w-6xl items-center px-4 py-3 sm:px-6 lg:px-8">
+		<a href="/" class="mr-4 min-w-fit text-sm font-semibold tracking-wide text-slate-900 dark:text-slate-100">
+			AviationNote
+		</a>
+
+		<!-- 桌面端导航 -->
+		<nav class="hidden flex-1 md:block" aria-label="Primary">
 			<Navigation />
 		</nav>
-		<div class="ml-4">
+
+		<!-- 桌面端操作区 -->
+		<div class="ml-auto hidden items-center gap-2 md:flex">
 			<!--
-				主题按钮参数说明：
-				- `rounded-full px-3 py-1.5`: 药丸按钮尺寸
-				- `border-slate-300 dark:border-slate-700`: 亮暗边框分别设置
-				- `data-theme-toggle`: 被下方 JS 绑定点击事件
+				语言切换占位组件（未接入功能）
+				- `rounded-full border`: 胶囊风格，和导航统一
+				- `px-2.5 py-1.5`: 触控和可读性平衡
+				- 当前只做视觉占位，后续接 i18n 时可给按钮绑定事件
 			-->
+			<div
+				class="inline-flex items-center rounded-full border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900"
+				role="group"
+				aria-label="Language switch (placeholder)"
+			>
+				<button
+					type="button"
+					aria-current="true"
+					class="rounded-full bg-slate-900 px-2.5 py-1.5 text-xs font-medium text-white dark:bg-slate-100 dark:text-slate-900"
+				>
+					中
+				</button>
+				<button
+					type="button"
+					class="rounded-full px-2.5 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300"
+				>
+					EN
+				</button>
+			</div>
+
+			<button
+				type="button"
+				data-theme-toggle
+				class="inline-flex min-w-24 items-center justify-center rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+			>
+				<span data-theme-label>Theme</span>
+			</button>
+		</div>
+
+		<!-- 移动端菜单按钮 -->
+		<button
+			type="button"
+			data-mobile-menu-toggle
+			aria-expanded="false"
+			aria-controls="mobile-nav-panel"
+			class="ml-auto inline-flex items-center justify-center rounded-full border border-slate-300 bg-white p-2 text-slate-700 transition-colors hover:bg-slate-100 md:hidden dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+		>
+			<span class="sr-only">Toggle menu</span>
+			<svg data-icon-open xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+			</svg>
+			<svg data-icon-close xmlns="http://www.w3.org/2000/svg" class="hidden h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6l-12 12" />
+			</svg>
+		</button>
+	</div>
+
+	<!-- 移动端面板 -->
+	<div
+		id="mobile-nav-panel"
+		data-mobile-menu-panel
+		class="hidden border-t border-slate-200 bg-white px-4 pb-4 pt-3 md:hidden dark:border-slate-800 dark:bg-slate-950"
+	>
+		<nav aria-label="Mobile primary">
+			<Navigation mobile={true} />
+		</nav>
+
+		<div class="mt-3 flex items-center gap-2">
+			<div
+				class="inline-flex items-center rounded-full border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900"
+				role="group"
+				aria-label="Language switch (placeholder)"
+			>
+				<button
+					type="button"
+					aria-current="true"
+					class="rounded-full bg-slate-900 px-2.5 py-1.5 text-xs font-medium text-white dark:bg-slate-100 dark:text-slate-900"
+				>
+					中
+				</button>
+				<button
+					type="button"
+					class="rounded-full px-2.5 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300"
+				>
+					EN
+				</button>
+			</div>
+
 			<button
 				type="button"
 				data-theme-toggle
@@ -30,28 +112,51 @@ import Navigation from './Navigation.astro';
 
 <script is:inline>
 	/*
-	 * 主题切换逻辑：
-	 * - 点击按钮在 `dark` 类和 `light` 状态间切换
-	 * - 同步写入 localStorage，让用户下次访问保持同一主题
+	 * Header 交互说明：
+	 * 1) 主题切换：同步更新所有 `data-theme-label` 文案。
+	 * 2) 移动菜单：点击按钮展开/收起面板，切换汉堡/关闭图标。
 	 */
 	(() => {
 		const html = document.documentElement;
-		const button = document.querySelector("[data-theme-toggle]");
-		const label = document.querySelector("[data-theme-label]");
-		if (!button || !label) return;
 
-		const syncLabel = () => {
+		const themeButtons = document.querySelectorAll("[data-theme-toggle]");
+		const themeLabels = document.querySelectorAll("[data-theme-label]");
+		const syncThemeLabel = () => {
 			const isDark = html.classList.contains("dark");
-			label.textContent = isDark ? "Dark" : "Light";
-			button.setAttribute("aria-label", isDark ? "Switch to light theme" : "Switch to dark theme");
+			themeLabels.forEach((label) => {
+				label.textContent = isDark ? "Dark" : "Light";
+			});
+			themeButtons.forEach((btn) => {
+				btn.setAttribute("aria-label", isDark ? "Switch to light theme" : "Switch to dark theme");
+			});
 		};
+		syncThemeLabel();
+		themeButtons.forEach((button) => {
+			button.addEventListener("click", () => {
+				const nextIsDark = !html.classList.contains("dark");
+				html.classList.toggle("dark", nextIsDark);
+				localStorage.setItem("theme", nextIsDark ? "dark" : "light");
+				syncThemeLabel();
+			});
+		});
 
-		syncLabel();
-		button.addEventListener("click", () => {
-			const nextIsDark = !html.classList.contains("dark");
-			html.classList.toggle("dark", nextIsDark);
-			localStorage.setItem("theme", nextIsDark ? "dark" : "light");
-			syncLabel();
+		const toggle = document.querySelector("[data-mobile-menu-toggle]");
+		const panel = document.querySelector("[data-mobile-menu-panel]");
+		const openIcon = document.querySelector("[data-icon-open]");
+		const closeIcon = document.querySelector("[data-icon-close]");
+		if (!toggle || !panel || !openIcon || !closeIcon) return;
+
+		const setMenuState = (expanded) => {
+			toggle.setAttribute("aria-expanded", expanded ? "true" : "false");
+			panel.classList.toggle("hidden", !expanded);
+			openIcon.classList.toggle("hidden", expanded);
+			closeIcon.classList.toggle("hidden", !expanded);
+		};
+		setMenuState(false);
+
+		toggle.addEventListener("click", () => {
+			const expanded = toggle.getAttribute("aria-expanded") === "true";
+			setMenuState(!expanded);
 		});
 	})();
 </script>

@@ -1,0 +1,9 @@
+[[redirects]]
+  from = "/notes/a320note"
+  to = "https://a320note.netlify.app/"
+  status = 200
+
+[[redirects]]
+  from = "/notes/a320note/*"
+  to = "https://a320note.netlify.app/:splat"
+  status = 200

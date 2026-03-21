@@ -1,4 +1,5 @@
 ---
+const { mobile = false } = Astro.props;
 const currentPath = Astro.url.pathname;
 const navItems = [
 	{ label: "Home", href: "/" },
@@ -6,9 +7,23 @@ const navItems = [
 	{ label: "Resources", href: "/resources/" },
 	{ label: "About", href: "/about/" }
 ];
+
+/**
+ * 参数说明（Navigation）
+ * - `mobile = false`: 默认桌面布局，`true` 时输出移动端纵向导航。
+ * - 桌面：`gap-2 sm:gap-3`，紧凑横向排列。
+ * - 移动：`flex-col gap-2`，触控友好，按钮更高。
+ */
+const listClass = mobile
+	? "flex flex-col gap-2"
+	: "flex flex-wrap items-center gap-2 sm:gap-3";
+
+const itemBase = mobile
+	? "inline-flex w-full rounded-xl px-3 py-2.5 text-sm font-medium transition-colors"
+	: "inline-flex rounded-full px-3 py-1.5 text-sm font-medium transition-colors";
 ---
 
-<ul class="flex flex-wrap items-center gap-2 sm:gap-3">
+<ul class={listClass}>
 	{
 		navItems.map((item) => {
 			const isActive =
@@ -19,7 +34,7 @@ const navItems = [
 						href={item.href}
 						aria-current={isActive ? "page" : undefined}
 						class:list={[
-							"inline-flex rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+							itemBase,
 							isActive
 								? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900"
 								: "text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100"
