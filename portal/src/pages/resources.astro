@@ -1,24 +1,123 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+
 const pageTitle = "资源";
 
-/**
- * 样式参数说明
- * - `lg:grid-cols-3`: 大屏三列展示工具卡片，信息密度更高。
- * - `rounded-xl`: 资源按钮的小圆角；如需更硬朗可改为 `rounded-lg`。
- * - `bg-slate-100 text-slate-700`: 亮色弱强调按钮，克制不抢眼。
- * - `dark:bg-slate-800 dark:text-slate-200`: 暗色按钮灰阶对比，保持可读性。
- * - `transition-colors`: 只做颜色动画，简洁且性能友好。
- */
+const featuredTools = [
+	{
+		name: "无线电呼号 - 听写练习",
+		description: "快速训练 ICAO 呼号识别，适合碎片化反复练习。",
+		href: "https://aviationnote.com/callsign_practice.html"
+	},
+	{
+		name: "E6B 风三角",
+		description: "快速计算风修正角、地速与航向修正，适合飞行计划与航行训练。",
+		href: "https://aviationnote.com/flight-planning-tool.html"
+	},
+	{
+		name: "无线电呼号 - 900句练习",
+		description: "通过大量实例强化无线电呼号识别和反应速度。",
+		href: "https://aviationnote.com/radio_callsign_practice.html"
+	},
+	{
+		name: "机场 / 航空公司 ICAO IATA 代码百科",
+		description: "查询机场和航空公司代码，适合日常查阅与记忆巩固。",
+		href: "https://aviationnote.com/airport-codes.html"
+	}
+];
+
+const resourceGroups = [
+	{
+		title: "理论与考试",
+		description: "适合系统性学习、备考回看和官方信息核对。",
+		items: [
+			{
+				name: "FAA Pilot Handbook",
+				description: "FAA 官方基础飞行理论手册，适合长期学习，作为课外读物。",
+				href: "https://www.faa.gov/regulations_policies/handbooks_manuals/aviation/phak"
+			},
+			{
+				name: "国内执照理论考试大纲和知识点",
+				description: "民航局飞行人员理论考试相关大纲与知识点浏览入口。",
+				href: "https://fsop.caac.gov.cn/g17/pltt/outlineliulan/liulan"
+			},
+			{
+				name: "飞行人员信息咨询",
+				description: "民航局飞行人员信息查询入口，用于核对执照和相关信息。",
+				href: "https://pilot.caac.gov.cn/servlet/HomepageServlet?defaultModel=HOMEPAGE"
+			}
+		]
+	},
+	{
+		title: "运行与资料",
+		description: "适合飞行前准备、航行情报查阅和运行文件检索。",
+		items: [
+			{
+				name: "Airservices Australia NAIPS",
+				description: "澳大利亚气象和航行资料查询、飞行计划提交等运行相关服务入口。",
+				href: "https://www.airservicesaustralia.com/naips/Account/Logon"
+			},
+			{
+				name: "Airservices Australia AIP",
+				description: "澳大利亚 AIP 与相关航行情报发布入口。",
+				href: "https://www.airservicesaustralia.com/aip/aip.asp"
+			}
+		]
+	},
+	{
+		title: "训练与观察",
+		description: "适合无线电环境熟悉、航迹观察和气象辅助判断。",
+		items: [
+			{
+				name: "LiveATC",
+				description: "收听全球机场实时或录制塔台通话，用于无线电环境熟悉。",
+				href: "https://www.liveatc.net/"
+			},
+			{
+				name: "Flightradar24",
+				description: "查看航班轨迹、机场活动和空域运行情况。",
+				href: "https://www.flightradar24.com/"
+			},
+			{
+				name: "Windy",
+				description: "面向飞行和天气观察的可视化气象工具。",
+				href: "https://www.windy.com/"
+			}
+		]
+	},
+	{
+		title: "更多资源",
+		description: "视频，图文教程，社区讨论等",
+		items: [
+			{
+				name: "From the Flight Deck – Phraseology",
+				description: "FAA示范常见易错点 - 地面运行和进近着陆常见通话用语。",
+				href: "https://www.youtube.com/watch?v=1D8-_p4f34I&list=PL5vHkqHi51DSNpsBC8nb8Q8gFcGVmWhGA&index=24"
+			}
+		]
+	}
+];
+
 const ui = {
 	title: "text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl dark:text-slate-100",
 	lead: "mt-3 max-w-3xl text-base leading-7 text-slate-600 dark:text-slate-300",
-	grid: "mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3",
-	card: "flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900",
+	sectionWrap: "mt-12",
+	sectionTitle: "text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100",
+	sectionText: "mt-3 max-w-3xl text-base leading-7 text-slate-600 dark:text-slate-300",
+	toolGrid: "mt-8 grid gap-4 md:grid-cols-2",
+	toolCard: "flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900",
 	cardTitle: "text-base font-semibold text-slate-900 dark:text-slate-100",
 	cardText: "mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300",
 	cardFooter: "mt-auto pt-4",
-	link: "inline-flex rounded-xl bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200 hover:text-slate-900 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 dark:hover:text-slate-100"
+	link: "inline-flex rounded-xl bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200 hover:text-slate-900 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 dark:hover:text-slate-100",
+	groupGrid: "mt-8 grid gap-4 lg:grid-cols-2",
+	groupCard: "rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900",
+	groupList: "mt-5 space-y-3",
+	resourceItem: "rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950",
+	resourceName: "text-base font-medium text-slate-900 dark:text-slate-100",
+	resourceText: "mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300",
+	resourceLink:
+		"mt-3 inline-flex text-sm font-medium text-slate-700 underline decoration-slate-300 underline-offset-4 transition-colors hover:text-slate-900 hover:decoration-slate-500 dark:text-slate-200 dark:decoration-slate-600 dark:hover:text-white dark:hover:decoration-slate-300"
 };
 ---
 
@@ -26,52 +125,58 @@ const ui = {
 	<section>
 		<h1 class={ui.title}>资源</h1>
 		<p class={ui.lead}>
-			面向飞行学习与训练的紧凑资源目录。先从常用工具开始，再逐步扩展为可维护的资源索引。
+			围绕飞行学习的实际使用场景整理资源。上方优先展示站内原创工具，下方再按理论、运行与训练场景归类外部链接，方便快速定位。
 		</p>
 	</section>
 
-	<section class={ui.grid}>
-		<article class={ui.card}>
-			<h2 class={ui.cardTitle}>呼号练习</h2>
-			<p class={ui.cardText}>用于 ICAO 呼号识别与复诵流畅度的快速训练空间。</p>
-			<div class={ui.cardFooter}>
-				<a class={ui.link} href="#">添加工具</a>
-			</div>
-		</article>
-		<article class={ui.card}>
-			<h2 class={ui.cardTitle}>E6B 风三角</h2>
-			<p class={ui.cardText}>快速计算风修正角、地速与航向修正。</p>
-			<div class={ui.cardFooter}>
-				<a class={ui.link} href="#">添加工具</a>
-			</div>
-		</article>
-		<article class={ui.card}>
-			<h2 class={ui.cardTitle}>ATC 术语</h2>
-			<p class={ui.cardText}>整理标准陆空通话术语与运行沟通示例链接。</p>
-			<div class={ui.cardFooter}>
-				<a class={ui.link} href="#">添加合集</a>
-			</div>
-		</article>
-		<article class={ui.card}>
-			<h2 class={ui.cardTitle}>气象参考</h2>
-			<p class={ui.cardText}>汇总常用天气解读与飞行计划相关资料。</p>
-			<div class={ui.cardFooter}>
-				<a class={ui.link} href="#">添加链接</a>
-			</div>
-		</article>
-		<article class={ui.card}>
-			<h2 class={ui.cardTitle}>法规资料库</h2>
-			<p class={ui.cardText}>按执照级别或运行类型组织法规和指导材料。</p>
-			<div class={ui.cardFooter}>
-				<a class={ui.link} href="#">添加文档</a>
-			</div>
-		</article>
-		<article class={ui.card}>
-			<h2 class={ui.cardTitle}>通用工具站</h2>
-			<p class={ui.cardText}>集中收录单位换算、航图查看等常用网站。</p>
-			<div class={ui.cardFooter}>
-				<a class={ui.link} href="#">添加工具</a>
-			</div>
-		</article>
+	<section class={ui.sectionWrap}>
+		<h2 class={ui.sectionTitle}>原创工具</h2>
+		<p class={ui.sectionText}>
+			优先面向高频使用场景设计，适合练习、复习和飞行前后快速辅助计算。
+		</p>
+
+		<div class={ui.toolGrid}>
+			{
+				featuredTools.map((tool) => (
+					<article class={ui.toolCard}>
+						<h3 class={ui.cardTitle}>{tool.name}</h3>
+						<p class={ui.cardText}>{tool.description}</p>
+						<div class={ui.cardFooter}>
+							<a class={ui.link} href={tool.href}>打开工具</a>
+						</div>
+					</article>
+				))
+			}
+		</div>
+	</section>
+
+	<section class={ui.sectionWrap}>
+		<h2 class={ui.sectionTitle}>常用资源</h2>
+		<p class={ui.sectionText}>
+			保留原页面里的核心链接，但改成更适合阅读和扩展的目录结构。后续新增资料时，可以继续归入对应分组，而不是追加成长段落。
+		</p>
+
+		<div class={ui.groupGrid}>
+			{
+				resourceGroups.map((group) => (
+					<section class={ui.groupCard}>
+						<h3 class="text-lg font-semibold text-slate-900 dark:text-slate-100">{group.title}</h3>
+						<p class="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{group.description}</p>
+
+						<div class={ui.groupList}>
+							{
+								group.items.map((item) => (
+									<article class={ui.resourceItem}>
+										<h4 class={ui.resourceName}>{item.name}</h4>
+										<p class={ui.resourceText}>{item.description}</p>
+										<a class={ui.resourceLink} href={item.href}>访问链接</a>
+									</article>
+								))
+							}
+						</div>
+					</section>
+				))
+			}
+		</div>
 	</section>
 </BaseLayout>

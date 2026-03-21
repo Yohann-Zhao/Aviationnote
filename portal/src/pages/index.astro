@@ -28,10 +28,10 @@ const ui = {
 <BaseLayout pageTitle={pageTitle} locale="zh">
 	<section class={ui.heroCard}>
 		<p class="text-sm font-medium uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">AviationNote</p>
-		<h1 class={ui.heroTitle}>一个专注于飞行学习与实践的知识站点</h1>
+		<h1 class={ui.heroTitle}>一个面向飞行学习的实用笔记和资源站</h1>
 		<p class={ui.heroText}>
-			AviationNote 是一个个人学习项目，用于整理飞行理论笔记、实用参考和可复用工具。
-			整体设计强调安静、可读和可持续扩展。
+			AviationNote 是一个非营利性的原创学习资源共享项目，包含飞行理论笔记、实用工具和资源参考等。
+			站点强调非营利性、实用性和可持续扩展。站点笔记内容和工具资源由作者原创编写、整理和开发。
 		</p>
 		<div class="mt-6 flex flex-wrap gap-3">
 			<a
@@ -51,21 +51,36 @@ const ui = {
 
 	<section class={ui.grid}>
 		<article class={ui.infoCard}>
-			<h2 class={ui.infoTitle}>为什么做这个站</h2>
+			<h2 class={ui.infoTitle}>站点用途</h2>
 			<p class={ui.infoText}>
-				建立一个稳定的个人航空学习系统，让笔记和工具在训练与考试前都能快速回看。
+				本站作者分享原创学习笔记，帮助初入飞行领域的朋友们快速建立对各个学科的感性认识，也帮助应试的朋友们在备考时尽快抓住考点和考前快速回看等等。
+			</p>
+			<p class={ui.infoText}>
+				本站还分享航空英语资源、原创实用工具等等。无线电通信呼号练习、风三角飞行计划计算器 等工具资源在持续开发和完善中。
+			</p>
+			<p class={ui.infoText}>
+				本站作者初衷为个人复习，提升个人技能。与此同时，将所有内容分享给愿意学习的朋友们。
 			</p>
 		</article>
 		<article class={ui.infoCard}>
-			<h2 class={ui.infoTitle}>如何使用</h2>
+			<h2 class={ui.infoTitle}>使用建议</h2>
 			<p class={ui.infoText}>
-				先在笔记页进行结构化学习，再在资源页使用计算器、链接和速查材料。
+			本站的笔记提供系统化的知识框架，精炼考试重点，使学习更有条理。然而，所有知识的基础仍然是课本和知识点，学员应在充分自学课本和知识点的基础上，结合本站的内容，形成自己的体系。
+			</p>
+			<p class={ui.infoText}>
+				本站内容均为作者个人理解和总结，难免存在不完善之处。请保持批判性思维。本站内容仅供学习参考，不能替代正式教材和专业培训。对于考试内容的理解和应用，请以官方教材和培训机构的指导为准。
+				如发现内容错误或有改进建议，欢迎 <a href="mailto:yuhan_zhao@nuaa.edu.cn" class="ml-1 font-medium text-slate-800 underline decoration-slate-300 underline-offset-4 transition-colors hover:decoration-slate-700 dark:text-slate-200 dark:decoration-slate-600 dark:hover:decoration-slate-300">联系作者</a>。
 			</p>
 		</article>
 		<article class={ui.infoCard}>
 			<h2 class={ui.infoTitle}>版权说明</h2>
 			<p class={ui.infoText}>
-				除特别注明外，个人笔记内容为原创。外部资源遵循各自的授权和署名规则。
+				除特别注明外，本站内容均为原创。外部资源遵循各自的授权和署名规则。
+				如发现未正确标注的来源或潜在版权问题，请 <a href="mailto:yuhan_zhao@nuaa.edu.cn" class="ml-1 font-medium text-slate-800 underline decoration-slate-300 underline-offset-4 transition-colors hover:decoration-slate-700 dark:text-slate-200 dark:decoration-slate-600 dark:hover:decoration-slate-300">联系作者</a>，将尽快更正。
+			</p>
+			<p class={ui.infoText}>
+				本站保留所有权利，欢迎合理使用和分享站点内容。
+				任何未经授权的商业使用和其它侵权行为都将面临承担法律责任。
 			</p>
 		</article>
 	</section>
