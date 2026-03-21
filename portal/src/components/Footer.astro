@@ -1,17 +1,23 @@
 ---
+import type { Locale } from "../utils/i18n";
+
+const locale: Locale = Astro.props.locale ?? "zh";
 ---
 
 <footer class="border-t border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
 	<div class="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-6 text-sm text-slate-600 sm:px-6 lg:px-8 dark:text-slate-400">
-		<p>&copy; {new Date().getFullYear()} Yuhan Zhao. All rights reserved.</p>
 		<p>
-			Learn more about my projects on
+			&copy; {new Date().getFullYear()} Yuhan Zhao.
+			{locale === "zh" ? " 保留所有权利。" : " All rights reserved."}
+		</p>
+		<p>
+			{locale === "zh" ? "更多项目请访问" : "Learn more about my projects on"}
 			<a
 				class="ml-1 font-medium text-slate-800 underline decoration-slate-300 underline-offset-4 transition-colors hover:decoration-slate-700 dark:text-slate-200 dark:decoration-slate-600 dark:hover:decoration-slate-300"
 				href="https://yohannzhao.netlify.app"
 			>
-				my website
-			</a>.
+				{locale === "zh" ? "我的网站" : "my website"}
+			</a>{locale === "zh" ? "。" : "."}
 		</p>
 	</div>
 </footer>

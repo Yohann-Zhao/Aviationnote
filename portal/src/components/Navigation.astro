@@ -1,11 +1,14 @@
 ---
+import { localizePath, type Locale } from "../utils/i18n";
+
 const { mobile = false } = Astro.props;
 const currentPath = Astro.url.pathname;
+const locale: Locale = Astro.props.locale ?? "zh";
 const navItems = [
-	{ label: "Home", href: "/" },
-	{ label: "Notes", href: "/notes/" },
-	{ label: "Resources", href: "/resources/" },
-	{ label: "About", href: "/about/" }
+	{ label: locale === "zh" ? "首页" : "Home", href: localizePath("/", locale), exact: true },
+	{ label: locale === "zh" ? "笔记" : "Notes", href: localizePath("/notes/", locale), exact: false },
+	{ label: locale === "zh" ? "资源" : "Resources", href: localizePath("/resources/", locale), exact: false },
+	{ label: locale === "zh" ? "关于" : "About", href: localizePath("/about/", locale), exact: false }
 ];
 
 /**
@@ -26,8 +29,10 @@ const itemBase = mobile
 <ul class={listClass}>
 	{
 		navItems.map((item) => {
+			const normalizedCurrent = currentPath.endsWith("/") && currentPath.length > 1 ? currentPath.slice(0, -1) : currentPath;
+			const normalizedHref = item.href.endsWith("/") && item.href.length > 1 ? item.href.slice(0, -1) : item.href;
 			const isActive =
-				currentPath === item.href || (item.href !== "/" && currentPath.startsWith(item.href));
+				normalizedCurrent === normalizedHref || (!item.exact && normalizedCurrent.startsWith(`${normalizedHref}/`));
 			return (
 				<li>
 					<a

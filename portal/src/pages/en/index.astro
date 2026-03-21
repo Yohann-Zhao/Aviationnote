@@ -1,18 +1,7 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-const pageTitle = "首页";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+const pageTitle = "Home";
 
-/**
- * Tailwind 参数说明（新手友好）
- * - `max-w-3xl` / `max-w-6xl`: 控制内容最大宽度，数字越大越宽。
- * - `px-4 sm:px-6`: 横向内边距，`sm:` 表示 >=640px 屏幕时使用后者。
- * - `py-12`: 纵向内边距，值越大上下留白越多。
- * - `rounded-2xl`: 圆角大小，`xl/2xl/3xl` 逐步变圆。
- * - `shadow-sm`: 轻阴影。可换 `shadow`（更明显）或删掉（更克制）。
- * - `border-slate-200`: 边框颜色。`slate-100` 更淡，`slate-300` 更明显。
- * - `text-slate-600`: 正文色。`500` 更深，`700` 对比更强。
- * - `dark:*`: 暗色主题覆盖值。例如 `dark:bg-slate-900` 只在暗色主题生效。
- */
 const ui = {
 	heroCard:
 		"rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10 dark:border-slate-800 dark:bg-slate-900",
@@ -25,47 +14,51 @@ const ui = {
 };
 ---
 
-<BaseLayout pageTitle={pageTitle} locale="zh">
+<BaseLayout pageTitle={pageTitle} locale="en">
 	<section class={ui.heroCard}>
 		<p class="text-sm font-medium uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">AviationNote</p>
-		<h1 class={ui.heroTitle}>一个专注于飞行学习与实践的知识站点</h1>
+		<h1 class={ui.heroTitle}>A focused aviation knowledge hub for study and practice</h1>
 		<p class={ui.heroText}>
-			AviationNote 是一个个人学习项目，用于整理飞行理论笔记、实用参考和可复用工具。
-			整体设计强调安静、可读和可持续扩展。
+			AviationNote is a personal learning project that organizes flight-theory notes, practical references,
+			and reusable tools into one clean space. The site is designed to be calm, readable, and easy to
+			expand.
 		</p>
 		<div class="mt-6 flex flex-wrap gap-3">
 			<a
-				href="/notes/"
+				href="/en/notes/"
 				class="inline-flex rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-300"
 			>
-				从笔记开始
+				Start with Notes
 			</a>
 			<a
-				href="/resources/"
+				href="/en/resources/"
 				class="inline-flex rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-slate-400 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:text-slate-100"
 			>
-				打开资源页
+				Open Resources
 			</a>
 		</div>
 	</section>
 
 	<section class={ui.grid}>
 		<article class={ui.infoCard}>
-			<h2 class={ui.infoTitle}>为什么做这个站</h2>
+			<h2 class={ui.infoTitle}>Why this site</h2>
 			<p class={ui.infoText}>
-				建立一个稳定的个人航空学习系统，让笔记和工具在训练与考试前都能快速回看。
+				Build a reliable personal system for aviation learning so notes and tools are easy to revisit before
+				training and exams.
 			</p>
 		</article>
 		<article class={ui.infoCard}>
-			<h2 class={ui.infoTitle}>如何使用</h2>
+			<h2 class={ui.infoTitle}>How to use</h2>
 			<p class={ui.infoText}>
-				先在笔记页进行结构化学习，再在资源页使用计算器、链接和速查材料。
+				Use Notes for structured reading, then jump to Resources for calculators, links, and quick-reference
+				materials.
 			</p>
 		</article>
 		<article class={ui.infoCard}>
-			<h2 class={ui.infoTitle}>版权说明</h2>
+			<h2 class={ui.infoTitle}>Copyright</h2>
 			<p class={ui.infoText}>
-				除特别注明外，个人笔记内容为原创。外部资源遵循各自的授权和署名规则。
+				Personal notes are original unless stated otherwise. External resources remain under their own
+				licenses and attribution terms.
 			</p>
 		</article>
 	</section>

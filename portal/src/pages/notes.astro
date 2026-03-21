@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-const pageTitle = "Notes";
+const pageTitle = "笔记";
 
 /**
  * 样式参数说明（可直接改数字试效果）
@@ -17,54 +17,52 @@ const ui = {
 	card: "flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900",
 	cardTitle: "text-base font-semibold text-slate-900 dark:text-slate-100",
 	cardText: "mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300",
-	cardFooter: "mt-auto pt-4",// 卡片底部区域，保持按钮在底部对齐
+	cardFooter: "mt-auto pt-4",
 	link: "inline-flex rounded-xl bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200 hover:text-slate-900 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 dark:hover:text-slate-100"
 };
 ---
 
-<BaseLayout pageTitle={pageTitle}>
-	<!-- Notes 页面：后续可扩展为“按科目分类 + 按时间更新 + 学习进度追踪” -->
+<BaseLayout pageTitle={pageTitle} locale="zh">
 	<section>
-		<h1 class={ui.title}>Notes</h1>
+		<h1 class={ui.title}>笔记</h1>
 		<p class={ui.lead}>
-			Structured aviation notes for theory review, checklist memory, and recurrent study. This page is ready
-			for future expansion by subject and training phase.
+			用于理论复习、检查单记忆和复训巩固的结构化航空笔记页面，可按科目与训练阶段持续扩展。
 		</p>
 	</section>
 
 	<section class={ui.grid}>
 		<article class={ui.card}>
-			<h2 class={ui.cardTitle}>CAAC Commercial/Airline Transport Pilot License Theory Notes</h2>
+			<h2 class={ui.cardTitle}>CAAC 商照 / 航线照理论笔记</h2>
 			<p class={ui.cardText}>
-				Group notes into modules such as meteorology, navigation, regulations, and radio communication.
+				按气象、航行、法规、陆空通话等模块组织学习内容，便于阶段化复习。
 			</p>
 			<div class={ui.cardFooter}>
-				<a class={ui.link} href="#">View Subjects</a>
+				<a class={ui.link} href="https://aviationnote.com/pilot_license_theory/caac_pilot_theory/">查看科目</a>
 			</div>
 		</article>
 		<article class={ui.card}>
-			<h2 class={ui.cardTitle}>A320 CBT Notes</h2>
-			<p class={ui.cardText}>Organize notes by CBT modules, focusing on key concepts.</p>
+			<h2 class={ui.cardTitle}>A320 CBT 笔记</h2>
+			<p class={ui.cardText}>按 CBT 模块整理内容，聚焦核心概念与易错点。</p>
 			<div class={ui.cardFooter}>
-				<a class={ui.link} href="/notes/a320note">View Modules</a>
+				<a class={ui.link} href="https://a320note.netlify.app/">查看模块</a>
 			</div>
 		</article>
 		<article class={ui.card}>
-			<h2 class={ui.cardTitle}>CASA Commercial Pilot License Theory Notes</h2>
+			<h2 class={ui.cardTitle}>CASA 商照理论笔记</h2>
 			<p class={ui.cardText}>
-				Group notes into modules such as meteorology, navigation, regulations, and radio communication.
+				按气象、航行、法规、陆空通话等模块组织学习内容，便于阶段化复习。
 			</p>
 			<div class={ui.cardFooter}>
-				<a class={ui.link} href="#">View Subjects</a>
+				<a class={ui.link} href="https://aviationnote.com/theory.html">查看科目</a>
 			</div>
 		</article>
 		<article class={ui.card}>
-			<h2 class={ui.cardTitle}>DA40 / DA42 Flight Training & Ground Component Notes</h2>
+			<h2 class={ui.cardTitle}>DA40 / DA42 飞行训练与地面课程笔记</h2>
 			<p class={ui.cardText}>
-				Reserve space for short reflections after each training session to build personal operating insight.
+				预留每次训练后的复盘记录，逐步形成个人操作经验库。
 			</p>
 			<div class={ui.cardFooter}>
-				<a class={ui.link} href="#">View Notes</a>
+				<a class={ui.link} href="https://aviationnote.com/flight-training.html">查看笔记</a>
 			</div>
 		</article>
 	</section>

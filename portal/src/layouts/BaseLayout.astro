@@ -1,11 +1,13 @@
 ---
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import { getLocaleFromPath, type Locale } from "../utils/i18n";
 import '../styles/global.css';
-const { pageTitle } = Astro.props;
+const { pageTitle, locale: localeProp } = Astro.props;
+const locale: Locale = localeProp ?? getLocaleFromPath(Astro.url.pathname);
 ---
 
-<html lang="en">
+<html lang={locale}>
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -29,11 +31,11 @@ const { pageTitle } = Astro.props;
 	</head>
 	<body class="min-h-screen bg-slate-50 text-slate-800 antialiased dark:bg-slate-950 dark:text-slate-200">
 		<div class="flex min-h-screen flex-col">
-			<Header />
+			<Header locale={locale} />
 			<main class="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
 				<slot />
 			</main>
-			<Footer />
+			<Footer locale={locale} />
 		</div>
 	</body>
 </html>
