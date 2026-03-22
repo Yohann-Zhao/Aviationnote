@@ -51,7 +51,9 @@ export default defineConfig({
 					},
 					items: [
 						{ label: 'EIS', translations: { 'zh-CN': 'EIS' }, link: '/eis_ecam/eis' },
-						{ label: 'ECAM', translations: { 'zh-CN': 'ECAM' },  badge: { text: 'In Progress', variant: 'caution' }, link: '/eis_ecam/ecam_system' },
+						{ label: 'ECAM System', translations: { 'zh-CN': 'ECAM 系统' },  badge: { text: 'In Progress', variant: 'caution' }, link: '/eis_ecam/ecam_system' },
+						{ label: 'ECAM Operation', translations: { 'zh-CN': 'ECAM 操作' },  badge: { text: 'In Progress', variant: 'caution' }, link: '/eis_ecam/ecam_operation' },
+						{ label: 'ECAM Failure Cases', translations: { 'zh-CN': 'ECAM 故障案例' },  badge: { text: 'In Progress', variant: 'caution' }, link: '/eis_ecam/ecam_failure_cases' },
 					],
 				},
 			],
