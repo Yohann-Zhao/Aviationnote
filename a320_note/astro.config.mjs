@@ -56,6 +56,26 @@ export default defineConfig({
 						{ label: 'ECAM Failure Cases', translations: { 'zh-CN': 'ECAM 故障案例' },  badge: { text: 'In Progress', variant: 'caution' }, link: '/eis_ecam/ecam_failure_cases' },
 					],
 				},
+				{
+					label: 'Pneumatic',
+					translations: {
+						'zh-CN': '气动系统',//这里要大写CN
+					},
+					items: [
+						{ label: 'Pneumatic System', translations: { 'zh-CN': '气动系统' }, badge: { text: 'In Progress', variant: 'caution' }, link: '/pneumatic/pneumatic_system' },
+						{ label: 'Pneumatic Failure', translations: { 'zh-CN': '气动故障' }, badge: { text: 'In Progress', variant: 'caution' }, link: '/pneumatic/pneumatic_failure_cases' },
+					],
+				},
+				{
+					label: 'Air Conditioning',
+					translations: {
+						'zh-CN': '空调系统',//这里要大写CN
+					},
+					items: [
+						{ label: 'Air Conditioning System', translations: { 'zh-CN': '空调系统' }, badge: { text: 'In Progress', variant: 'caution' }, link: '/air_conditioning/air_conditioning_system' },
+						{ label: 'Air Conditioning Operation', translations: { 'zh-CN': '空调操作' }, badge: { text: 'In Progress', variant: 'caution' }, link: '/air_conditioning/air_conditioning_operation' },
+					],
+				},
 			],
 		}),
 	],

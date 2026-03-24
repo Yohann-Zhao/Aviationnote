@@ -1,0 +1,1006 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>呼号练习</title>
+</head>
+
+<body>
+    <main class="container">
+        <section id="radio call into" class="text-section">
+            <h2>基本呼号读法</h2>
+            <p>呼号是飞机的标识，由字母和数字组成。</p>
+            <h3>发音规则</h3>
+                <li>字母：A（Alpha）、B（Bravo）、C（Charlie）、D（Delta）、E（Echo）、F（Foxtrot）、G（Golf）、H（Hotel）、I（India）、J（Juliet）、K（Kilo）、L（Lima）、M（Mike）、N（November）、O（Oscar）、P（Papa）、Q（Quebec）、R（Romeo）、S（Sierra）、T（Tango）、U（Uniform）、V（Victor）、W（Whiskey）、X（X-ray）、Y（Yankee）、Z（Zulu）</li>
+                <li>数字：3（Tree）、9（Niner）; 呼号中的数字两两为一组</li>
+            <h3>发音示例</h3>
+                <li>AI9: "Alpha India Niner"、8470: "Eighty Four Seventy"、172D: "One Seventy Two Delta"</li>
+        </section>
+
+        <section id="Real_AU_callsign_reader" class="text-section">
+            <h2>呼号听写练习</h2>
+            <details>
+                <summary>使用说明</summary>
+                <div class="section">
+                    <h4>通用说明</h4>
+                    <p>- 通用航空呼号：点击“通用航空呼号”按钮，播放模拟交通的机型与呼号（例如 Cessna ABC123），练习写下并识别呼号，仅填写呼号部分。</p>
+                    <p>- 4位数字练习：点击“4位数字练习”播放连续四位数字读法，适合训练数字分组与读法。</p>
+                    <p>- 字母练习：点击“英文字母练习”可练习字母听写，可在「更多选项」中自定义字母集合与字母长度。</p>
+                    <h4>更多提示</h4>
+                    <ul>
+                        <li>在“更多选项”中可调整语速、口音、每组数量与自定义字母。</li>
+                        <li>启用“模拟陆空通话音色”可使播放更接近真实 VHF AM 无线电音色（可能增加短暂处理延迟）。</li>
+                        <li>按键说明：回车=核对答案，空格=重放/暂停/继续，R=重新生成，H=显示/隐藏答案。</li>
+                    </ul>
+                </div>
+            </details>
+            <details>
+                <summary>更多选项</summary>
+                <div class="control-group">
+                    <div class="input-group">
+                        <label>每组呼号数量：</label>
+                        <input type="number" id="callsignCount" value="1" min="1" max="50">
+                    </div>
+                    <div class="input-group">
+                        <label>自定义字母：</label>
+                        <input type="text" id="customLetters" maxlength="26" placeholder="字母专练：例如XYZR，默认A-Z">
+                    </div>
+                    <div class="input-group">
+                        <label>每组字母数量：</label>
+                        <input type="number" id="letterCount" value="9" min="1" max="50">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div id="speedControl">
+                        <label>语速调整
+                            <input type="range" id="speed" min="0.3" max="2" value="1.2" step="0.1" oninput="updateSpeed(this.value)">
+                            <span id="speedValue">1.2</span>
+                        </label>
+                    </div>
+                    <div class="input-group">
+                        <label>口音选择：</label>
+                        <select id="accentSelect">
+                            <option value="australian">🇦🇺 澳大利亚英语</option>
+                            <option value="american">🇺🇸 美国英语</option>
+                            <option value="british">🇬🇧 英国英语</option>
+                            <option value="indian">🇮🇳 印度英语</option>
+                            <option value="southeast_asia">🇵🇭 东南亚英语</option>
+                            <option value="mixed" selected>🌍 混合口音</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                            <input type="checkbox" id="atcToneCheckbox" checked> 模拟陆空通话音色
+                        </label>
+                    </div>
+                </div>
+            </details>
+
+            <div class="button-group">
+                <button onclick="playTransportAirline()">运输航空呼号</button>
+                <button onclick="playSimulated()"> 通用航空呼号</button>
+                <button onclick="playFormat1()">4位数字练习</button>
+                <button onclick="playLetters()">英文字母练习</button>
+            </div>
+            <div class="button-group">
+                <button onclick="toggleAnswer()">
+                    <span id="toggleIcon">🔍</span> 
+                    <span id="toggleText">显示答案</span>
+                </button>
+                <button id="pauseResumeBtn" onclick="togglePauseResume()" disabled>⏸ 重放/暂停/继续</button>
+                <button id="stopBtn" onclick="stopPlayback()" disabled>⏹ 停止</button>
+            </div>
+            <div class="shortcut-hints-container">
+                <div class="shortcut-hints">
+                    <kbd>回车</kbd>核对答案 | 
+                    <kbd>空格</kbd>暂停/重放 | 
+                    <kbd>R</kbd>重新生成 | 
+                    <kbd>H</kbd>隐藏答案
+                </div>
+            </div>
+            <div id="answer"></div>
+        
+            <div class="answer-input-group">
+                <input type="text" id="userAnswer" placeholder="在此输入你的答案, 回车键核对" 
+                       onkeypress="if(event.key === 'Enter') checkAnswer()">
+                <button onclick="checkAnswer()">✓ 核对答案</button>
+            </div>
+            <div id="answerFeedback" class="feedback"></div>
+            
+        
+            <script>
+                const GOOGLE_TTS_API_KEY = 'AIzaSyB8kUi4-oUJgYZQFidBvtGsjLrS1dxw1W4'; 
+                
+                // 不同地区英语口音的语音库
+                const ACCENT_VOICES = {
+                    australian: [
+                        'en-AU-Standard-A',
+                        'en-AU-Standard-B',
+                        'en-AU-Standard-C',
+                        'en-AU-Standard-D'
+                    ],
+                    american: [
+                        'en-US-Standard-A',
+                        'en-US-Standard-B',
+                        'en-US-Standard-C',
+                        'en-US-Standard-D'
+                    ],
+                    british: [
+                        'en-GB-Standard-A',
+                        'en-GB-Standard-B',
+                        'en-GB-Standard-C',
+                        'en-GB-Standard-D'
+                    ],
+                    indian: [
+                        'en-IN-Standard-A',
+                        'en-IN-Standard-B',
+                        'en-IN-Standard-C'
+                    ],
+                    southeast_asia: [
+                        'en-SG-Standard-A',  // 新加坡英语
+                    ],
+                    mixed: [
+                        'en-AU-Standard-A', 'en-AU-Standard-B',
+                        'en-AU-Standard-C', 'en-AU-Standard-D',
+                        'en-US-Standard-A', 'en-US-Standard-B',
+                        'en-US-Standard-C', 'en-US-Standard-D',
+                        'en-GB-Standard-A', 'en-GB-Standard-B',
+                        'en-GB-Standard-C', 'en-GB-Standard-D',
+                        'en-IN-Standard-A', 'en-IN-Standard-B', 'en-IN-Standard-C',
+                        'en-SG-Standard-A'
+                    ]
+                };
+        
+                const aviationMap = {
+                    'A': 'Alpha', 'B': 'Bravo', 'C': 'Charlie', 'D': 'Delta',
+                    'E': 'Echo', 'F': 'Foxtrot', 'G': 'Golf', 'H': 'Hotel',
+                    'I': 'India', 'J': 'Juliet', 'K': 'Kilo', 'L': 'Lima',
+                    'M': 'Mike', 'N': 'November', 'O': 'Oscar', 'P': 'Papa',
+                    'Q': 'Quebec', 'R': 'Romeo', 'S': 'Sierra', 'T': 'Tango',
+                    'U': 'Uniform', 'V': 'Victor', 'W': 'Whiskey', 'X': 'Xray',
+                    'Y': 'Yankee', 'Z': 'Zulu'
+                };
+        
+                const aircraftTypes = [
+                    "Cessna","Cessna Citation", "Brumby", "Sling", "Diamond", "Saab", 
+                    "Beech King Air","Beech Baron", "Embraer", "Bombardier", "Piper", "Piper warrior", "Piper Chieftain","Beechcraft", "Eclipse", "Jabiru",
+                    "Gulfstream", "Cirrus", "Mooney", "Robin", "Socata", "BRM Aero",
+                    "Pilatus", "Tecnam", "Extra", "Van's Aircraft", "Ambulance", "Careflight"
+                ];
+
+                    // Transport airline ICAO -> Callsign name mapping
+                const CARRIERS = {
+                    "QFA": "QANTAS",
+                    "AAL": "AMERICAN",
+                    "BAW": "SPEEDBIRD",
+                    "DAL": "DELTA",
+                    "UAL": "UNITED",
+                    "AFR": "AIR FRANS",
+                    "DLH": "LUFTHANSA",
+                    "KLM": "KLM",
+                    "SVA": "SAUDIA",
+                    "SWR": "SWISS",
+                    "EZY": "EASY",
+                    "RYR": "RYANAIR",
+                    "ACA": "AIR CANADA",
+                    "JAL": "JAPAN AIR",
+                    "ANA": "ALL NIPPON",
+                    "SIA": "SINGAPORE",
+                    "MAS": "MALAYSIAN",
+                    "CCA": "AIR CHINA",
+                    "CES": "CHINA EASTERN",
+                    "CSN": "CHINA SOUTHERN",
+                    "CPA": "CATHAY",
+                    "HVN": "VIETNAM AIRLINES",
+                    "JST": "JETSTAR",
+                    "VOZ": "VELOCITY",
+                    "RXA": "REX",
+                    "QLK": "Q-LINK"
+                };
+        
+                const ultraLightAircraft = ["Brumby", "Sling", "Tecnam", "Van's Aircraft", "Van's", "BRM Aero", "Jabiru"];
+                const aviationNumbers = {
+                    '0': 'Zero', '1': 'One', '2': 'Two', 
+                    '3': 'Tree', '4': 'Four', '5': 'Five',
+                    '6': 'Six', '7': 'Seven', '8': 'Eight', 
+                    '9': 'Niner'
+                };
+
+                // 在常量区添加数字范围
+                const FORMAT1_RANGES = [
+                    {min: 1000, max: 9999} // 任意四位数
+                ];
+                const FORMAT2_RANGES = [
+                    {min: 160, max: 174} // 160-174区间
+                ];
+
+                let currentAnswer = {
+                    type: null,     // 'letters' 或 'callsigns'
+                    raw: "",        // 原始答案字符串
+                    elements: []    // 解析后的元素数组（字母或纯呼号）
+                };
+                let currentAudio = null;
+
+                //播放数字呼号
+                function playFormat1() {
+                    const callsignCount = parseInt(document.getElementById("callsignCount").value, 10);
+                    let output = [];
+                    let speechParts = [];
+                    
+                    for(let i=0; i<callsignCount; i++){
+                        const number = generateNumber(FORMAT1_RANGES);
+                        const [speech, formatted] = processFormat1(number);
+                        
+                        output.push(formatted);
+                        speechParts.push(speech);
+                    }
+                    
+                    currentAnswer = {
+                        type: 'format1',
+                        raw: output.join(', '),
+                        elements: output
+                    };
+                    updateAnswer();
+                    speakText(speechParts.join(', '));
+
+                     // 新增自动聚焦到输入框
+                    document.getElementById('userAnswer').focus(); // 自动聚焦到输入框
+                }
+
+                // 播放运输航空呼号（ICAO + 3-4位航班号）
+                function playTransportAirline() {
+                    const keys = Object.keys(CARRIERS);
+                    const icao = keys[Math.floor(Math.random() * keys.length)];
+                    const carrierName = CARRIERS[icao] || icao;
+
+                    // 随机选择 3 或 4 位航班号
+                    const len = (Math.random() < 0.5) ? 3 : 4;
+                    let numStr = '';
+                    let speechParts = '';
+
+                    if (len === 3) {
+                        const n = Math.floor(Math.random() * 900) + 100; // 100-999
+                        numStr = n.toString();
+                        // 3位数字逐位读
+                        speechParts = numStr.split('').map(d => convertSingleNumber(d)).join(' ');
+                    } else {
+                        const n = Math.floor(Math.random() * 9000) + 1000; //1000-9999
+                        // processFormat1 返回 [spokenForm, numericString]
+                        const res = processFormat1(n);
+                        speechParts = res[0];
+                        numStr = res[1];
+                    }
+
+                    const spoken = `${carrierName} ${speechParts}`;
+
+                    // 保存标准答案为 ICAO + 数字（例如 QFA1234）
+                    currentAnswer = {
+                        type: 'callsigns',
+                        raw: `${icao}${numStr}`,
+                        elements: [`${icao}${numStr}`]
+                    };
+
+                    updateAnswer();
+                    speakText(spoken);
+                    document.getElementById('userAnswer').focus();
+                    updateButtonState();
+                }
+
+                // 辅助函数
+                function generateNumber(ranges) {
+                    const range = ranges[Math.floor(Math.random()*ranges.length)];
+                    return Math.floor(Math.random()*(range.max - range.min +1)) + range.min;
+                }
+
+                function processFormat1(number) {
+                    const numStr = number.toString().padStart(4, '0');
+                    const part1 = numStr.substring(0, 2); // 直接使用两位字符串
+                    const part2 = numStr.substring(2);    // 直接使用两位字符串
+
+                    const speech1 = convertNumberGroup(part1);
+                    const speech2 = convertNumberGroup(part2);
+
+                    return [`${speech1} ${speech2}`, numStr];
+                }
+
+                // 添加辅助显示函数
+                function showFeedback(message, isCorrect) {
+                    const feedbackDiv = document.getElementById('answerFeedback');
+                    feedbackDiv.innerHTML = message;
+                    feedbackDiv.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+                }
+
+                function base64ToBlob(base64Data, contentType = '', sliceSize = 512) {
+                    const byteCharacters = atob(base64Data);
+                    const byteArrays = [];
+                    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+                        const slice = byteCharacters.slice(offset, offset + sliceSize);
+                        const byteNumbers = new Array(slice.length);
+                        for (let i = 0; i < slice.length; i++) {
+                            byteNumbers[i] = slice.charCodeAt(i);
+                        }
+                        const byteArray = new Uint8Array(byteNumbers);
+                        byteArrays.push(byteArray);
+                    }
+                    return new Blob(byteArrays, { type: contentType });
+                }
+        
+                function togglePauseResume() {
+                    if (!currentAudio) return;
+                    if (currentAudio.paused) {
+                        currentAudio.play();
+                    } else {
+                        currentAudio.pause();
+                    }
+                }
+        
+                function stopPlayback() {
+                    if (currentAudio) {
+                        currentAudio.pause();
+                        currentAudio.currentTime = 0;
+                        currentAudio = null;
+                    }
+                    updateButtonState();
+                }
+        
+                function updateButtonState() {
+                    const pauseResumeBtn = document.getElementById('pauseResumeBtn');
+                    const stopBtn = document.getElementById('stopBtn');
+                    const isPlaying = currentAudio && !currentAudio.paused;
+                    
+                    pauseResumeBtn.disabled = !currentAudio;
+                    stopBtn.disabled = !currentAudio;
+                }
+        
+                function generateCustomLetters() {
+                    const custom = document.getElementById("customLetters").value
+                        .toUpperCase().replace(/[^A-Z]/g, '');
+                    return custom || "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+                }
+
+        
+        
+                async function speakText(text) {
+                    const speed = parseFloat(document.getElementById('speed').value);
+                    const selectedAccent = document.getElementById('accentSelect').value || 'australian';
+                    const voices = ACCENT_VOICES[selectedAccent] || ACCENT_VOICES['australian'];
+                    const selectedVoice = voices[Math.floor(Math.random() * voices.length)];
+                    
+                    // 提取语言代码（例如 'en-AU-Standard-A' -> 'en-AU'）
+                    const languageCode = selectedVoice.split('-').slice(0, 2).join('-');
+        
+                    try {
+                        const response = await fetch(
+                            `https://texttospeech.googleapis.com/v1/text:synthesize?key=${GOOGLE_TTS_API_KEY}`,
+                            {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    input: { text: text },
+                                    voice: {
+                                        languageCode: languageCode,
+                                        name: selectedVoice
+                                    },
+                                    audioConfig: { 
+                                        audioEncoding: 'MP3', 
+                                        speakingRate: speed,
+                                        pitch: Math.random() * 2 - 1 // 随机音高(-1到+1)
+                                    }
+                                })
+                            }
+                        );
+        
+                        const data = await response.json();
+                        const audioContent = data.audioContent;
+                        const blob = base64ToBlob(audioContent, 'audio/mp3');
+
+                        // 如果启用了模拟陆空通话音色，对音频进行离线处理（带通/滤波/压缩/噪声）
+                        const atcEnabled = document.getElementById('atcToneCheckbox') && document.getElementById('atcToneCheckbox').checked;
+
+                        let playBlob = blob;
+                        if (atcEnabled) {
+                            try {
+                                playBlob = await renderBlobWithATCEffect(blob);
+                            } catch (err) {
+                                console.warn('ATC 音色处理失败，使用原始音频播放，错误：', err);
+                                playBlob = blob;
+                            }
+                        }
+
+                        const url = URL.createObjectURL(playBlob);
+
+                        if (currentAudio) {
+                            currentAudio.pause();
+                            try { URL.revokeObjectURL(currentAudio.src); } catch(e){}
+                        }
+
+                        currentAudio = new Audio(url);
+
+                        currentAudio.addEventListener('play', updateButtonState);
+                        currentAudio.addEventListener('pause', updateButtonState);
+                        currentAudio.addEventListener('ended', updateButtonState);
+                        currentAudio.play();
+                    } catch (error) {
+                        console.error('语音合成失败:', error);
+                        alert('语音合成失败，请检查API密钥和网络连接');
+                    }
+                }
+
+                // 将合成的 MP3 Blob 用 OfflineAudioContext 渲染为更真实的 VHF AM 无线电音色（300-3000Hz、噪声、轻微抖动、AM幅度抖动）
+                async function renderBlobWithATCEffect(mp3blob) {
+                    const arrayBuffer = await mp3blob.arrayBuffer();
+                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const decoded = await audioCtx.decodeAudioData(arrayBuffer);
+
+                    // 创建 OfflineAudioContext 用于离线渲染
+                    const offlineCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(decoded.numberOfChannels, decoded.length, decoded.sampleRate);
+
+                    const src = offlineCtx.createBufferSource();
+                    src.buffer = decoded;
+
+                    // 主要滤波：窄带（以带通模拟），中心靠近 1000Hz，带宽覆盖大致 300-3000Hz
+                    const bandpass = offlineCtx.createBiquadFilter();
+                    bandpass.type = 'bandpass';
+                    bandpass.frequency.value = 1000;
+                    bandpass.Q.value = 0.8; // 适度的窄带，使声音变薄
+
+                    // 额外低通削减高频，保持在 3000Hz 以下
+                    const lowpass = offlineCtx.createBiquadFilter();
+                    lowpass.type = 'lowpass';
+                    lowpass.frequency.value = 3000;
+                    lowpass.Q.value = 0.7;
+
+                    // 额外高通削减低频，保持在 300Hz 以上
+                    const highpass = offlineCtx.createBiquadFilter();
+                    highpass.type = 'highpass';
+                    highpass.frequency.value = 300;
+                    highpass.Q.value = 0.7;
+
+                    // 轻度饱和使声音带有电台特性，但不要过度失真
+                    const waveShaper = offlineCtx.createWaveShaper();
+                    waveShaper.curve = makeDistortionCurve(1.5); // 更小的失真量
+                    waveShaper.oversample = '2x';
+
+                    // 轻度压缩，模拟半双工广播被压缩的感觉
+                    const compressor = offlineCtx.createDynamicsCompressor();
+                    compressor.threshold.value = -30;
+                    compressor.knee.value = 20;
+                    compressor.ratio.value = 4;
+                    compressor.attack.value = 0.005;
+                    compressor.release.value = 0.2;
+
+                    // 主输出增益（用于 AM 调制基线）
+                    const masterGain = offlineCtx.createGain();
+                    masterGain.gain.value = 0.95;
+
+                    // 低频 LFO，用于模拟 AM 风格的幅度抖动（比如说话过程中轻微的起伏）
+                    const amLFO = offlineCtx.createOscillator();
+                    const amGain = offlineCtx.createGain();
+                    amLFO.type = 'sine';
+                    amLFO.frequency.value = 3.5 + Math.random() * 2.5; // 约 3.5-6Hz
+                    amGain.gain.value = 0.06; // 幅度抖动范围
+
+                    // 将 LFO 输出连接到 masterGain 的增益（偏移通过 baseline=0.95）
+                    amLFO.connect(amGain);
+                    amGain.connect(masterGain.gain);
+
+                    // 另一个低频 LFO 连接到 playbackRate，以制造轻微抖动（pitch jitter）
+                    const pitchLFO = offlineCtx.createOscillator();
+                    const pitchGain = offlineCtx.createGain();
+                    pitchLFO.type = 'sine';
+                    pitchLFO.frequency.value = 5 + Math.random() * 4; // ~5-9Hz 微抖
+                    pitchGain.gain.value = 0.012; // 微小的速率抖动
+                    pitchLFO.connect(pitchGain);
+                    // 将 pitchLFO 连接到源的 playbackRate
+                    pitchGain.connect(src.playbackRate);
+
+                    // 噪声（恒定低量 hiss）以及间歇性静电/爆裂（短促的噪声突发）
+                    const noiseBuffer = offlineCtx.createBuffer(1, decoded.length, decoded.sampleRate);
+                    const noiseData = noiseBuffer.getChannelData(0);
+                    for (let i = 0; i < noiseData.length; i++) {
+                        noiseData[i] = (Math.random() * 2 - 1) * 0.02; // 更明显的底噪
+                    }
+                    const noiseSrc = offlineCtx.createBufferSource();
+                    noiseSrc.buffer = noiseBuffer;
+                    noiseSrc.loop = false;
+
+                    const noiseGain = offlineCtx.createGain();
+                    // 基线噪声量（很小）
+                    noiseGain.gain.value = 0.02;
+
+                    // 添加若干短促静电突发
+                    const durationSec = decoded.duration || (decoded.length / decoded.sampleRate);
+                    const bursts = Math.max(1, Math.floor(durationSec / 3)); // 每 ~3s 一个突发
+                    for (let b = 0; b < bursts; b++) {
+                        const start = Math.random() * durationSec;
+                        const burstLen = 0.08 + Math.random() * 0.18; // 80-260ms
+                        // 从低到高再回落，使用较短 ramp 模拟短促噪声
+                        noiseGain.gain.setValueAtTime(0.02, start);
+                        noiseGain.gain.linearRampToValueAtTime(0.16 + Math.random() * 0.12, start + 0.005);
+                        noiseGain.gain.linearRampToValueAtTime(0.02, start + burstLen);
+                    }
+
+                    // 连接图： src -> waveShaper -> bandpass -> highpass -> lowpass -> compressor -> masterGain -> destination
+                    src.connect(waveShaper);
+                    waveShaper.connect(bandpass);
+                    bandpass.connect(highpass);
+                    highpass.connect(lowpass);
+                    lowpass.connect(compressor);
+                    compressor.connect(masterGain);
+                    masterGain.connect(offlineCtx.destination);
+
+                    // 噪声路径连接到最终压缩器/主增益
+                    noiseSrc.connect(noiseGain);
+                    noiseGain.connect(compressor);
+
+                    // 持续存在的高频纯音（电子蜂鸣 / 细小铃声），稳定且偏亮
+                    const highToneOsc = offlineCtx.createOscillator();
+                    highToneOsc.type = 'sine';
+                    highToneOsc.frequency.value = 200; // 可调：4200Hz 为较清晰明亮的高频
+                    const highToneGain = offlineCtx.createGain();
+                    highToneGain.gain.value = 0.01; // 低音量，作为背景“滴—”连续尖细单音
+
+                    // 将高频直接接入压缩器以避免低通削减，使其保持明亮
+                    highToneOsc.connect(highToneGain);
+                    highToneGain.connect(compressor);
+
+                    // 启动所有源和 LFO
+                    src.start(0);
+                    noiseSrc.start(0);
+                    amLFO.start(0);
+                    pitchLFO.start(0);
+                    highToneOsc.start(0);
+
+                    const rendered = await offlineCtx.startRendering();
+
+                    // 将渲染结果归一化：把处理后音量放大到原始未处理的峰值水平，尽量避免裁剪
+                    function getPeak(buf) {
+                        let peak = 0;
+                        for (let ch = 0; ch < buf.numberOfChannels; ch++) {
+                            const data = buf.getChannelData(ch);
+                            for (let i = 0; i < data.length; i++) {
+                                const v = Math.abs(data[i]);
+                                if (v > peak) peak = v;
+                            }
+                        }
+                        return peak;
+                    }
+
+                    const origPeak = Math.max(getPeak(decoded), 1e-9);
+                    const renderedPeak = Math.max(getPeak(rendered), 1e-9);
+
+                    // 计算需要的增益以匹配原始峰值
+                    let neededGain = origPeak / renderedPeak;
+
+                    if (neededGain > 0 && Math.abs(neededGain - 1) > 1e-3) {
+                        // 先按 neededGain 放大/缩小样本
+                        let maxAfter = 0;
+                        for (let ch = 0; ch < rendered.numberOfChannels; ch++) {
+                            const data = rendered.getChannelData(ch);
+                            for (let i = 0; i < data.length; i++) {
+                                data[i] = data[i] * neededGain;
+                                const v = Math.abs(data[i]);
+                                if (v > maxAfter) maxAfter = v;
+                            }
+                        }
+
+                        // 如果放大后出现裁剪风险（>1），再按比例缩小以避免裁剪
+                        if (maxAfter > 1) {
+                            const reduce = 1 / maxAfter;
+                            for (let ch = 0; ch < rendered.numberOfChannels; ch++) {
+                                const data = rendered.getChannelData(ch);
+                                for (let i = 0; i < data.length; i++) {
+                                    data[i] = data[i] * reduce;
+                                }
+                            }
+                        }
+                    }
+
+                    // 将渲染结果编码为 WAV blob
+                    const wavBlob = audioBufferToWavBlob(rendered);
+                    audioCtx.close();
+                    return wavBlob;
+                }
+
+                // 波形失真曲线生成
+                function makeDistortionCurve(amount) {
+                    const k = typeof amount === 'number' ? amount : 50;
+                    const nSamples = 44100;
+                    const curve = new Float32Array(nSamples);
+                    const deg = Math.PI / 180;
+                    for (let i = 0; i < nSamples; ++i) {
+                        const x = i * 2 / nSamples - 1;
+                        curve[i] = (3 + k) * x * 20 * deg / (Math.PI + k * Math.abs(x));
+                    }
+                    return curve;
+                }
+
+                // 将 AudioBuffer 转为 WAV Blob (16-bit PCM)
+                function audioBufferToWavBlob(buffer) {
+                    const numOfChan = buffer.numberOfChannels;
+                    const length = buffer.length * numOfChan * 2 + 44;
+                    const bufferArray = new ArrayBuffer(length);
+                    const view = new DataView(bufferArray);
+
+                    function writeString(view, offset, string) {
+                        for (let i = 0; i < string.length; i++) {
+                            view.setUint8(offset + i, string.charCodeAt(i));
+                        }
+                    }
+
+                    let offset = 0;
+                    writeString(view, offset, 'RIFF'); offset += 4;
+                    view.setUint32(offset, 36 + buffer.length * numOfChan * 2, true); offset += 4;
+                    writeString(view, offset, 'WAVE'); offset += 4;
+                    writeString(view, offset, 'fmt '); offset += 4;
+                    view.setUint32(offset, 16, true); offset += 4;
+                    view.setUint16(offset, 1, true); offset += 2;
+                    view.setUint16(offset, numOfChan, true); offset += 2;
+                    view.setUint32(offset, buffer.sampleRate, true); offset += 4;
+                    view.setUint32(offset, buffer.sampleRate * numOfChan * 2, true); offset += 4;
+                    view.setUint16(offset, numOfChan * 2, true); offset += 2;
+                    view.setUint16(offset, 16, true); offset += 2;
+                    writeString(view, offset, 'data'); offset += 4;
+                    view.setUint32(offset, buffer.length * numOfChan * 2, true); offset += 4;
+
+                    // 写入 PCM 样本
+                    for (let i = 0; i < buffer.length; i++) {
+                        for (let channel = 0; channel < numOfChan; channel++) {
+                            const sample = buffer.getChannelData(channel)[i];
+                            const s = Math.max(-1, Math.min(1, sample));
+                            view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+                            offset += 2;
+                        }
+                    }
+
+                    return new Blob([view], { type: 'audio/wav' });
+                }
+        
+        
+                function playLetters() {
+                    const letters = generateCustomLetters();
+                    const letterCount = parseInt(document.getElementById("letterCount").value, 10);
+                    const randomString = Array.from({length: letterCount}, () => 
+                        letters[Math.floor(Math.random() * letters.length)]
+                    ).join('');
+                    
+                    currentAnswer = {
+                        type: 'letters',
+                        raw: randomString,
+                        elements: [randomString]
+                    };
+                    
+                    updateAnswer();
+                    speakText(randomString.split('').map(c => aviationMap[c]).join(' '));
+
+                     // 新增自动聚焦到输入框
+                     document.getElementById('userAnswer').focus(); // 自动聚焦到输入框
+                }
+                
+                //播放模拟呼号
+                function playSimulated() {
+                    const callsignCount = parseInt(document.getElementById("callsignCount").value, 10);
+                    let output = [];
+                    let speechParts = [];
+                    let callsignList = [];
+                    
+                    for(let i=0; i<callsignCount; i++){
+                        const aircraft = aircraftTypes[Math.random()*aircraftTypes.length|0];
+                        let callsign, speech;
+                        
+                        if(ultraLightAircraft.includes(aircraft)) {
+                            // 生成四位数呼号并确保两位分组
+                            const part1 = Math.floor(Math.random()*90)+10; // 10-99
+                            const part2 = Math.floor(Math.random()*90)+10;
+                            callsign = part1.toString() + part2.toString().padStart(2, '0'); // 强制四位数
+                            
+                            // 调用统一的数字转换函数
+                            speech = [
+                                convertNumberGroup(part1.toString().padStart(2, '0')), // 前两位
+                                convertNumberGroup(part2.toString().padStart(2, '0'))  // 后两位
+                            ].join(' ');
+                        } else {
+                            const isLettersOnly = Math.random() < 0.5;
+                            
+                            if(isLettersOnly) {
+                                callsign = Array.from({length:3}, () => 
+                                    String.fromCharCode(65 + Math.random()*26|0)
+                                ).join('');
+                                speech = callsign.split('').map(c => aviationMap[c]).join(' ');
+                            } else {
+                                let hasLetter = false, hasNumber = false;
+                                do {
+                                    callsign = '';
+                                    hasLetter = false;
+                                    hasNumber = false;
+                                    for(let j=0; j<3; j++) {
+                                        if(Math.random() < 0.5) {
+                                            callsign += String.fromCharCode(65 + Math.random()*26|0);
+                                            hasLetter = true;
+                                        } else {
+                                            callsign += Math.random()*10|0;
+                                            hasNumber = true;
+                                        }
+                                    }
+                                } while(!(hasLetter && hasNumber));
+                                
+                                speech = callsign.split('').map(c => {
+                                    return /[A-Z]/.test(c) ? aviationMap[c] : convertSingleNumber(c);
+                                }).join(' ');
+                            }
+                        }
+                        
+                        output.push(`${aircraft} ${callsign}`);
+                        callsignList.push(callsign.replace(/[^A-Z0-9]/g, ''));
+                        speechParts.push(`${aircraft} ${speech}`);
+                    }
+                    
+                    currentAnswer = {
+                        type: 'callsigns',
+                        raw: output.join(', '),
+                        elements: callsignList
+                    };
+                    updateAnswer();
+                    speakText(speechParts.join(', '));
+
+                     // 新增自动聚焦到输入框
+                    document.getElementById('userAnswer').focus(); // 自动聚焦到输入框
+                }
+        
+                // 辅助函数保持不变...
+                function convertNumberGroup(twoDigitStr) {
+                    const firstDigit = twoDigitStr[0];
+                    const secondDigit = twoDigitStr[1];
+
+                    // 处理前导零的情况 (如 "05" -> Zero Five)
+                    if (firstDigit === '0') {
+                        if (secondDigit === '0') return 'Zero Zero';
+                        return `Zero ${aviationNumbers[secondDigit]}`;
+                    }
+
+                    // 处理10-19的特殊读法
+                    if (firstDigit === '1') {
+                        const num = parseInt(twoDigitStr, 10);
+                        switch(num) {
+                            case 10: return 'Ten';
+                            case 11: return 'Eleven';
+                            case 12: return 'Twelve';
+                            case 13: return 'Thirteen';
+                            case 14: return 'Fourteen';
+                            case 15: return 'Fifteen';
+                            case 16: return 'Sixteen';
+                            case 17: return 'Seventeen';
+                            case 18: return 'Eighteen';
+                            case 19: return 'Nineteen';
+                        }
+                    }
+
+                    // 处理20-99的读法
+                    let tenPart = aviationNumbers[firstDigit]
+                        .replace('Two', 'Twenty')
+                        .replace('Tree', 'Thirty')
+                        .replace('Four', 'Forty')
+                        .replace('Five', 'Fifty')
+                        .replace('Six', 'Sixty')
+                        .replace('Seven', 'Seventy')
+                        .replace('Eight', 'Eighty')
+                        .replace('Niner', 'Ninety');
+
+                    if (secondDigit === '0') {
+                        return tenPart; // 整十数如30 -> Thirty
+                    } else {
+                        return `${tenPart} ${aviationNumbers[secondDigit]}`; // 非整十数如34 -> Thirty Four
+                    }
+                }
+
+                function convertSingleNumber(numChar) {
+                    return aviationNumbers[numChar];
+                }
+        
+                // 修改答案显示逻辑
+                function updateAnswer() {
+                    const div = document.getElementById('answer');
+                    div.textContent = currentAnswer.raw;
+                    document.getElementById('userAnswer').value = '';
+                    document.getElementById('answerFeedback').textContent = '';
+                    document.getElementById('answerFeedback').className = 'feedback';
+                }
+
+                function updateSpeed(v) {
+                    document.getElementById('speedValue').textContent = v;
+                }
+        
+                function toggleAnswer() {
+                    const div = document.getElementById('answer');
+                    const icon = document.getElementById('toggleIcon');
+                    const text = document.getElementById('toggleText');
+                    
+                    if(div.style.display === 'none') {
+                        div.style.display = 'block';
+                        icon.textContent = '👁️';
+                        text.textContent = '隐藏答案';
+                    } else {
+                        div.style.display = 'none';
+                        icon.textContent = '🔍';
+                        text.textContent = '显示答案';
+                    }
+                }
+        
+                document.addEventListener('visibilitychange', function() {
+                    if (document.hidden) {
+                        stopPlayback();
+                    }
+                });
+            
+                // 改进的答案核对函数
+                function checkAnswer() {
+                    const cleanInput = (str) => str.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                    const userInput = document.getElementById('userAnswer').value;
+                    const feedbackDiv = document.getElementById('answerFeedback');
+                    
+                    // 清空反馈样式
+                    feedbackDiv.className = 'feedback';
+                    feedbackDiv.innerHTML = '';
+
+                    // 处理呼号模式
+                    if(currentAnswer.type === 'callsigns') {
+                        // 拆分用户输入为多个呼号（允许任意分隔符）
+                        const userCallsigns = userInput.split(/[^a-zA-Z0-9]+/)
+                            .filter(Boolean)
+                            .map(cleanInput);
+
+                        // 答案验证逻辑
+                        const expected = currentAnswer.elements;
+                        let errorDetails = [];
+                        
+                        // 检查数量匹配
+                        if(userCallsigns.length !== expected.length) {
+                            feedbackDiv.innerHTML = `
+                                <div class="error-header">⚠ 需要${expected.length}个呼号，你输入了${userCallsigns.length}个</div>
+                                <div class="correct-all">正确答案：${expected.join(', ')}</div>
+                            `;
+                            feedbackDiv.className += ' incorrect';
+
+                            // 新增：提交答案后，移除输入框焦点
+                             document.getElementById('userAnswer').blur(); // 新增：移除输入框焦点
+
+                            return;
+                        }
+
+                        // 逐个比较呼号并记录错误细节
+                        expected.forEach((correct, index) => {
+                            const userAnswer = userCallsigns[index];
+                            if(userAnswer !== correct) {
+                                errorDetails.push({
+                                    position: index + 1,
+                                    user: userAnswer || "[空输入]",
+                                    correct: correct
+                                });
+                            }
+                        });
+
+                        // 构建反馈信息
+                        if(errorDetails.length === 0) {
+                            feedbackDiv.innerHTML = '✅ 所有呼号正确！';
+                            feedbackDiv.className += ' correct';
+                        } else {
+                            let errorList = errorDetails.map(err => 
+                                `- 第${err.position}个呼号错误：应为 <span class="correct-highlight">${err.correct}</span>，你输入了 <span class="user-error">${err.user}</span>`
+                            ).join('<br>');
+
+                            feedbackDiv.innerHTML = `
+                                <div class="error-header">⚠ 发现 ${errorDetails.length} 处错误：</div>
+                                <div class="error-details">${errorList}</div>
+                                <div class="correct-all">正确答案：${expected.join(', ')}</div>
+                            `;
+                            feedbackDiv.className += ' incorrect';
+                        }
+                    }
+                    // 字母模式保持原有逻辑
+                    else if(currentAnswer.type === 'letters') {
+                        const userClean = cleanInput(userInput);
+                        const correctClean = cleanInput(currentAnswer.raw);
+                        
+                        if(userClean === correctClean) {
+                            feedbackDiv.textContent = '✅ 答案正确！';
+                            feedbackDiv.className += ' correct';
+                        } else {
+                            feedbackDiv.textContent = `⚠ 答案错误，正确答案：${currentAnswer.raw}`;
+                            feedbackDiv.className += ' incorrect';
+                        }
+                    }
+                        // 在已有代码的if结构中添加：
+                    else if(currentAnswer.type.startsWith('format')) {
+                        const cleanInput = (str) => str.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                        const userAnswers = userInput.split(/[^a-zA-Z0-9]+/)
+                            .filter(Boolean)
+                            .map(s => currentAnswer.type === 'format2' ? 
+                                s.replace(/D$/i, '') + 'D' : // 标准化D后缀
+                                s.padStart(4, '0').substring(0,4));
+                        
+                        const expected = currentAnswer.elements;
+                        let errors = [];
+                        
+                        if(userAnswers.length !== expected.length) {
+                            showFeedback(`⚠ 需要${expected.length}个呼号，你输入了${userAnswers.length}个`, false);
+
+                            // 新增：提交答案后，移除输入框焦点
+                            document.getElementById('userAnswer').blur(); // 新增：移除输入框焦点
+
+                            return;
+                        }
+                        
+                        userAnswers.forEach((answer, i) => {
+                            const cleanAnswer = cleanInput(answer);
+                            const cleanExpected = cleanInput(expected[i]);
+                            if(cleanAnswer !== cleanExpected) errors.push(`⚠ 第${i+1}个呼号错误，应为 ${expected[i]}`);
+                        });
+                        
+                        if(errors.length > 0) {
+                            showFeedback(errors.join('<br>') + `<br>正确答案：${expected.join(', ')}`, false);
+                        } else {
+                            showFeedback('✅ 所有呼号正确！', true);
+                        }
+                    }
+
+                    // 新增：提交答案后，移除输入框焦点
+                    document.getElementById('userAnswer').blur(); // 新增：移除输入框焦点
+                }
+            
+                // 添加辅助显示函数
+                function showFeedback(message, isCorrect) {
+                    const feedbackDiv = document.getElementById('answerFeedback');
+                    feedbackDiv.innerHTML = message;
+                    feedbackDiv.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+                }
+                
+                // 在脚本末尾添加键盘事件监听
+                document.addEventListener('keydown', handleKeyboardShortcuts);
+
+                // 键盘处理函数
+                function handleKeyboardShortcuts(event) {
+                    const activeTag = document.activeElement.tagName.toLowerCase();
+                    
+                    // 排除输入框聚焦状态
+                    if (activeTag === 'input' || activeTag === 'textarea') return;
+
+                    switch(event.key.toLowerCase()) {
+                        case ' ': // 空格键：播放/暂停
+                            event.preventDefault();
+                            togglePauseResume();
+                            break;
+                            
+                        case 'enter': // 回车键：提交答案
+                            event.preventDefault();
+                            checkAnswer();
+                            break;
+                            
+                        case 'arrowleft': // 左箭头：减慢语速
+                            adjustSpeed(-0.1);
+                            break;
+                            
+                        case 'arrowright': // 右箭头：加快语速
+                            adjustSpeed(0.1);
+                            break;
+                            
+                        case 'r': // R键：重新生成题目
+                            if(event.ctrlKey) break; // 避免与浏览器刷新冲突
+                            event.preventDefault();
+                            if(currentAnswer.type === 'callsigns') playSimulated();
+                            else if(currentAnswer.type === 'letters') playLetters();
+                            break;
+                            
+                        case 'h': // H键：显示/隐藏答案
+                            event.preventDefault();
+                            toggleAnswer();
+                            break;
+                    }
+                }
+            </script>
+        </section>
+    </main>
+</body>
+</html>

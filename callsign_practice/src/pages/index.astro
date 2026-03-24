@@ -1,0 +1,98 @@
+﻿---
+const pageTitle = "Aviation Callsign Dictation";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+  </head>
+  <body>
+    <main>
+      <h1>{pageTitle}</h1>
+      <p>Generate a callsign, convert it to ICAO-style speech, send it to the backend, and play the audio.</p>
+
+      <button id="generateButton" type="button">Generate and Play</button>
+      <button id="replayButton" type="button" disabled>Replay</button>
+
+      <section>
+        <p><strong>Callsign:</strong> <span id="callsignOutput">Not generated yet.</span></p>
+        <p><strong>Spoken phrase:</strong> <span id="phraseOutput">Not generated yet.</span></p>
+        <p><strong>Status:</strong> <span id="statusOutput">Idle.</span></p>
+      </section>
+
+      <audio id="audioPlayer" controls preload="none"></audio>
+    </main>
+
+    <script>
+      import { buildCallsignSample } from "../lib/callsign.js";
+      import { clearTtsAudioCache, fetchTtsAudioUrl } from "../lib/tts-client.js";
+
+      const generateButton = document.querySelector("#generateButton");
+      const replayButton = document.querySelector("#replayButton");
+      const callsignOutput = document.querySelector("#callsignOutput");
+      const phraseOutput = document.querySelector("#phraseOutput");
+      const statusOutput = document.querySelector("#statusOutput");
+      const audioPlayer = document.querySelector("#audioPlayer");
+
+      let currentSample = null;
+
+      function renderSample(sample) {
+        callsignOutput.textContent = sample.callsign;
+        phraseOutput.textContent = sample.spokenPhrase;
+      }
+
+      function setStatus(message) {
+        statusOutput.textContent = message;
+      }
+
+      async function playPhrase(phrase) {
+        // Audio handling: fetch bytes, create a Blob URL, and hand it to the browser audio element.
+        setStatus("Requesting audio from /api/tts...");
+        const audioUrl = await fetchTtsAudioUrl(phrase);
+        audioPlayer.src = audioUrl;
+        audioPlayer.currentTime = 0;
+        await audioPlayer.play();
+        setStatus("Playing audio.");
+      }
+
+      async function generateAndPlay() {
+        generateButton.disabled = true;
+        replayButton.disabled = true;
+
+        try {
+          currentSample = buildCallsignSample();
+          renderSample(currentSample);
+          await playPhrase(currentSample.spokenPhrase);
+          replayButton.disabled = false;
+        } catch (error) {
+          setStatus(error instanceof Error ? error.message : "Audio generation failed.");
+        } finally {
+          generateButton.disabled = false;
+        }
+      }
+
+      generateButton.addEventListener("click", () => {
+        void generateAndPlay();
+      });
+
+      replayButton.addEventListener("click", async () => {
+        if (!currentSample) {
+          return;
+        }
+
+        try {
+          await playPhrase(currentSample.spokenPhrase);
+        } catch (error) {
+          setStatus(error instanceof Error ? error.message : "Replay failed.");
+        }
+      });
+
+      window.addEventListener("beforeunload", () => {
+        clearTtsAudioCache();
+      });
+    </script>
+  </body>
+</html>
