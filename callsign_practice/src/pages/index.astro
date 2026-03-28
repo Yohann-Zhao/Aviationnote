@@ -1,5 +1,17 @@
 ﻿---
 const pageTitle = "Aviation Callsign Dictation";
+const accentOptions = [
+  { value: "mixed", label: "Mixed English" },
+  { value: "american", label: "American English" },
+  { value: "british", label: "British English" },
+  { value: "australian", label: "Australian English" },
+  { value: "indian", label: "Indian English" }
+];
+const answerModes = [
+  { value: "typed", label: "Type the answer" },
+  { value: "multipleChoice", label: "Choose from 4 similar options" }
+];
+const defaultSpeakingRate = 1.2;
 ---
 
 <!doctype html>
@@ -8,91 +20,767 @@ const pageTitle = "Aviation Callsign Dictation";
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
+    <style>
+      :root {
+        --bg: #f4efe5;
+        --bg-panel: rgba(255, 252, 247, 0.92);
+        --ink: #1e1e1a;
+        --muted: #5f6358;
+        --line: rgba(30, 30, 26, 0.12);
+        --accent: #9c4f2f;
+        --correct: #1f6f43;
+        --correct-soft: rgba(31, 111, 67, 0.12);
+        --incorrect: #9b2c2c;
+        --incorrect-soft: rgba(155, 44, 44, 0.12);
+        --shadow: 0 18px 40px rgba(62, 40, 20, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Segoe UI", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top left, rgba(156, 79, 47, 0.18), transparent 26%),
+          radial-gradient(circle at top right, rgba(48, 101, 128, 0.12), transparent 28%),
+          linear-gradient(180deg, #fbf7ef 0%, var(--bg) 100%);
+      }
+
+      main {
+        width: min(960px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 32px 0 48px;
+      }
+
+      .panel {
+        background: var(--bg-panel);
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        padding: 24px;
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(8px);
+      }
+
+      .panel + .panel {
+        margin-top: 18px;
+      }
+
+      .eyebrow {
+        margin: 0 0 10px;
+        font-size: 0.78rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2rem, 4vw, 3.2rem);
+        line-height: 1;
+      }
+
+      .hero-copy {
+        max-width: 60ch;
+        margin: 14px 0 0;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .control-grid,
+      .summary-grid {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      }
+
+      label {
+        display: grid;
+        gap: 8px;
+        font-size: 0.94rem;
+        font-weight: 600;
+      }
+
+      select,
+      input,
+      button {
+        font: inherit;
+      }
+
+      select,
+      input[type="text"],
+      input[type="number"],
+      input[type="range"] {
+        width: 100%;
+      }
+
+      select,
+      input[type="text"],
+      input[type="number"] {
+        border: 1px solid rgba(30, 30, 26, 0.16);
+        border-radius: 12px;
+        padding: 12px 14px;
+        background: rgba(255, 255, 255, 0.92);
+        color: var(--ink);
+      }
+
+      input[type="range"] {
+        accent-color: var(--accent);
+      }
+
+      .range-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.88rem;
+        color: var(--muted);
+      }
+
+      .toggle-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+      }
+
+      .toggle-label input[type="checkbox"] {
+        width: auto;
+        transform: scale(1.15);
+        accent-color: var(--accent);
+      }
+
+      select:disabled,
+      input:disabled,
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .microcopy {
+        margin: 12px 0 0;
+        font-size: 0.92rem;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 18px;
+      }
+
+      button {
+        border: 0;
+        border-radius: 999px;
+        padding: 12px 18px;
+        background: var(--accent);
+        color: #fff;
+        cursor: pointer;
+        transition: transform 140ms ease, opacity 140ms ease, background 140ms ease;
+      }
+
+      button:hover:not(:disabled) {
+        transform: translateY(-1px);
+      }
+
+      .ghost-button {
+        background: rgba(30, 30, 26, 0.08);
+        color: var(--ink);
+      }
+
+      .summary-item {
+        padding: 16px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.62);
+        border: 1px solid rgba(30, 30, 26, 0.08);
+      }
+
+      .summary-label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--muted);
+      }
+
+      .summary-value {
+        margin: 0;
+        line-height: 1.5;
+      }
+
+      .answer-box {
+        margin-top: 18px;
+        padding: 18px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.66);
+        border: 1px dashed rgba(30, 30, 26, 0.14);
+      }
+
+      .answer-box h2 {
+        margin: 0 0 8px;
+        font-size: 1rem;
+      }
+
+      .answer-box p {
+        margin: 0;
+        line-height: 1.6;
+      }
+
+      .response-layout {
+        display: grid;
+        gap: 16px;
+      }
+
+      .input-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .input-row input {
+        flex: 1 1 280px;
+      }
+
+      .choices {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      }
+
+      .choice-button {
+        padding: 16px;
+        border-radius: 16px;
+        font-family: Consolas, monospace;
+        letter-spacing: 0.08em;
+        background: rgba(30, 30, 26, 0.06);
+        color: var(--ink);
+      }
+
+      .choice-button.correct {
+        background: var(--correct-soft);
+        color: var(--correct);
+      }
+
+      .choice-button.incorrect {
+        background: var(--incorrect-soft);
+        color: var(--incorrect);
+      }
+
+      .feedback {
+        margin: 0;
+        padding: 14px 16px;
+        border-radius: 14px;
+        border: 1px solid transparent;
+        line-height: 1.5;
+      }
+
+      .feedback.idle {
+        background: rgba(30, 30, 26, 0.05);
+        color: var(--muted);
+      }
+
+      .feedback.correct {
+        background: var(--correct-soft);
+        border-color: rgba(31, 111, 67, 0.18);
+        color: var(--correct);
+      }
+
+      .feedback.incorrect {
+        background: var(--incorrect-soft);
+        border-color: rgba(155, 44, 44, 0.18);
+        color: var(--incorrect);
+      }
+
+      audio {
+        width: 100%;
+        margin-top: 18px;
+      }
+
+      @media (max-width: 640px) {
+        main {
+          width: min(100% - 20px, 960px);
+          padding-top: 20px;
+        }
+
+        .panel {
+          padding: 18px;
+          border-radius: 18px;
+        }
+
+        .actions,
+        .input-row {
+          flex-direction: column;
+        }
+      }
+    </style>
   </head>
   <body>
     <main>
-      <h1>{pageTitle}</h1>
-      <p>Generate a callsign, convert it to ICAO-style speech, send it to the backend, and play the audio.</p>
-
-      <button id="generateButton" type="button">Generate and Play</button>
-      <button id="replayButton" type="button" disabled>Replay</button>
-
-      <section>
-        <p><strong>Callsign:</strong> <span id="callsignOutput">Not generated yet.</span></p>
-        <p><strong>Spoken phrase:</strong> <span id="phraseOutput">Not generated yet.</span></p>
-        <p><strong>Status:</strong> <span id="statusOutput">Idle.</span></p>
+      <section class="panel">
+        <p class="eyebrow">Aviation Dictation MVP</p>
+        <h1>{pageTitle}</h1>
+        <p class="hero-copy">
+          Choose a callsign pattern, an official Google English accent, speech speed, and whether the
+          output should be post-processed into a radio-style transmission with a continuous carrier tone.
+        </p>
       </section>
 
-      <audio id="audioPlayer" controls preload="none"></audio>
+      <section class="panel">
+        <div class="control-grid">
+          <label>
+            Practice mode
+            <select id="practiceMode">
+              <option value="transport">Transport airline</option>
+              <option value="generalAviation" selected>General aviation</option>
+              <option value="numeric">Numeric only</option>
+              <option value="letters">Custom letters</option>
+            </select>
+          </label>
+
+          <label>
+            Answer mode
+            <select id="answerMode">
+              {answerModes.map((mode) => (
+                <option value={mode.value}>{mode.label}</option>
+              ))}
+            </select>
+          </label>
+
+          <label>
+            Accent
+            <select id="accentSelect">
+              {accentOptions.map((accent) => (
+                <option value={accent.value}>{accent.label}</option>
+              ))}
+            </select>
+          </label>
+
+          <label>
+            Custom letters
+            <input id="customLetters" type="text" maxlength="26" placeholder="Example: ABCXYZ" />
+          </label>
+
+          <label>
+            Letter length
+            <input id="letterLength" type="number" min="2" max="8" value="4" />
+          </label>
+
+          <label>
+            Speaking rate
+            <input
+              id="speakingRate"
+              type="range"
+              min="0.25"
+              max="2"
+              step="0.05"
+              value={defaultSpeakingRate}
+            />
+            <span class="range-meta">
+              <span>Google TTS range: 0.25x to 2.00x</span>
+              <strong id="speakingRateValue">{defaultSpeakingRate.toFixed(2)}x</strong>
+            </span>
+          </label>
+        </div>
+
+        <p id="controlHint" class="microcopy muted">
+          General Aviation and Custom Letters use the custom letter pool when letters are generated.
+        </p>
+
+        <p class="microcopy">
+          <label class="toggle-label">
+            <input id="radioToneCheckbox" type="checkbox" checked />
+            Simulate aviation radio tone after synthesis
+          </label>
+        </p>
+
+        <div class="actions">
+          <button id="generateButton" type="button">Generate and Play</button>
+          <button id="replayButton" type="button" class="ghost-button" disabled>Replay</button>
+          <button id="revealButton" type="button" class="ghost-button" disabled>Show Answer</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="summary-grid">
+          <div class="summary-item">
+            <span class="summary-label">Current mode</span>
+            <p id="modeOutput" class="summary-value">Not generated yet.</p>
+          </div>
+
+          <div class="summary-item">
+            <span class="summary-label">Answer rule</span>
+            <p id="instructionOutput" class="summary-value">Generate a sample to begin.</p>
+          </div>
+
+          <div class="summary-item">
+            <span class="summary-label">Status</span>
+            <p id="statusOutput" class="summary-value">Idle.</p>
+          </div>
+        </div>
+
+        <div class="answer-box">
+          <h2>Hidden Answer</h2>
+          <p id="answerOutput">Generate a sample to start.</p>
+          <p id="phraseOutput" class="microcopy muted">Spoken phrase stays hidden during practice.</p>
+        </div>
+      </section>
+
+      <section class="panel response-layout">
+        <div id="typedSection">
+          <div class="input-row">
+            <input id="answerInput" type="text" placeholder="Type the answer and press Enter" />
+            <button id="checkButton" type="button">Check Answer</button>
+          </div>
+        </div>
+
+        <div id="choiceSection" hidden>
+          <div id="choiceButtons" class="choices"></div>
+        </div>
+
+        <p id="feedbackOutput" class="feedback idle">Generate a sample to start.</p>
+        <audio id="audioPlayer" controls preload="none"></audio>
+      </section>
     </main>
 
     <script>
-      import { buildCallsignSample } from "../lib/callsign.js";
+      import {
+        buildAnswerChoices,
+        buildCallsignSample,
+        normalizeAnswerInput,
+        normalizeCustomLetterSet
+      } from "../lib/callsign.js";
       import { clearTtsAudioCache, fetchTtsAudioUrl } from "../lib/tts-client.js";
 
+      const practiceModeSelect = document.querySelector("#practiceMode");
+      const answerModeSelect = document.querySelector("#answerMode");
+      const accentSelect = document.querySelector("#accentSelect");
+      const customLettersInput = document.querySelector("#customLetters");
+      const letterLengthInput = document.querySelector("#letterLength");
+      const speakingRateInput = document.querySelector("#speakingRate");
+      const speakingRateValue = document.querySelector("#speakingRateValue");
+      const radioToneCheckbox = document.querySelector("#radioToneCheckbox");
+      const controlHint = document.querySelector("#controlHint");
       const generateButton = document.querySelector("#generateButton");
       const replayButton = document.querySelector("#replayButton");
-      const callsignOutput = document.querySelector("#callsignOutput");
-      const phraseOutput = document.querySelector("#phraseOutput");
+      const revealButton = document.querySelector("#revealButton");
+      const modeOutput = document.querySelector("#modeOutput");
+      const instructionOutput = document.querySelector("#instructionOutput");
       const statusOutput = document.querySelector("#statusOutput");
+      const answerOutput = document.querySelector("#answerOutput");
+      const phraseOutput = document.querySelector("#phraseOutput");
+      const answerInput = document.querySelector("#answerInput");
+      const checkButton = document.querySelector("#checkButton");
+      const typedSection = document.querySelector("#typedSection");
+      const choiceSection = document.querySelector("#choiceSection");
+      const choiceButtons = document.querySelector("#choiceButtons");
+      const feedbackOutput = document.querySelector("#feedbackOutput");
       const audioPlayer = document.querySelector("#audioPlayer");
 
       let currentSample = null;
+      let currentChoices = [];
+      let answerRevealed = false;
+      let choiceResolved = false;
 
-      function renderSample(sample) {
-        callsignOutput.textContent = sample.callsign;
-        phraseOutput.textContent = sample.spokenPhrase;
+      function cleanCustomLettersInput(value) {
+        return Array.from(
+          new Set(
+            String(value ?? "")
+              .toUpperCase()
+              .replace(/[^A-Z]/g, "")
+              .split("")
+          )
+        ).join("");
+      }
+
+      function normalizeSpeakingRate(value) {
+        const parsed = Number(value);
+
+        if (!Number.isFinite(parsed)) {
+          return 1.2;
+        }
+
+        return Math.min(2, Math.max(0.25, parsed));
+      }
+
+      function updateSpeakingRateOutput() {
+        const speakingRate = normalizeSpeakingRate(speakingRateInput.value);
+        speakingRateValue.textContent = `${speakingRate.toFixed(2)}x`;
       }
 
       function setStatus(message) {
         statusOutput.textContent = message;
       }
 
-      async function playPhrase(phrase) {
-        // Audio handling: fetch bytes, create a Blob URL, and hand it to the browser audio element.
-        setStatus("Requesting audio from /api/tts...");
-        const audioUrl = await fetchTtsAudioUrl(phrase);
+      function setFeedback(message, tone = "idle") {
+        feedbackOutput.textContent = message;
+        feedbackOutput.className = `feedback ${tone}`;
+      }
+
+      function getGenerationOptions() {
+        const customLetters = cleanCustomLettersInput(customLettersInput.value);
+
+        return {
+          mode: practiceModeSelect.value,
+          customLetters,
+          letterLength: Number(letterLengthInput.value) || 4
+        };
+      }
+
+      function getPlaybackOptions() {
+        return {
+          accent: accentSelect.value,
+          speakingRate: normalizeSpeakingRate(speakingRateInput.value),
+          radioTone: radioToneCheckbox.checked
+        };
+      }
+
+      function updateControlState() {
+        const mode = practiceModeSelect.value;
+        const usesCustomLetters = mode === "generalAviation" || mode === "letters";
+        const usesLetterLength = mode === "letters";
+        const playbackOptions = getPlaybackOptions();
+
+        customLettersInput.disabled = !usesCustomLetters;
+        letterLengthInput.disabled = !usesLetterLength;
+
+        if (mode === "transport") {
+          controlHint.textContent = "Transport mode reads the airline name out loud, but the expected answer is only the flight number.";
+        } else if (mode === "generalAviation") {
+          controlHint.textContent = "General Aviation uses aircraft type plus a 3-character suffix. The custom letter pool affects the letter characters.";
+        } else if (mode === "numeric") {
+          controlHint.textContent = "Numeric mode generates a 4-digit callsign pronounced in grouped aviation style.";
+        } else {
+          controlHint.textContent = "Custom Letters uses the custom letter pool and the length control for pure letter dictation.";
+        }
+
+        controlHint.textContent += ` Current speech rate: ${playbackOptions.speakingRate.toFixed(2)}x.${playbackOptions.radioTone ? " Radio post-processing is enabled." : " Radio post-processing is disabled."}`;
+      }
+
+      function updateAnswerVisibility() {
+        revealButton.textContent = answerRevealed ? "Hide Answer" : "Show Answer";
+
+        if (!currentSample) {
+          answerOutput.textContent = "Generate a sample to start.";
+          phraseOutput.textContent = "Spoken phrase stays hidden during practice.";
+          return;
+        }
+
+        if (answerRevealed) {
+          answerOutput.textContent = currentSample.revealAnswer;
+          phraseOutput.textContent = `Spoken phrase: ${currentSample.spokenPhrase}`;
+        } else {
+          answerOutput.textContent = "Hidden until you reveal it or submit an answer.";
+          phraseOutput.textContent = "Spoken phrase stays hidden during practice.";
+        }
+      }
+
+      function renderChoices() {
+        choiceButtons.innerHTML = "";
+        choiceSection.hidden = answerModeSelect.value !== "multipleChoice";
+        typedSection.hidden = !choiceSection.hidden;
+
+        if (choiceSection.hidden) {
+          return;
+        }
+
+        if (!currentSample) {
+          const empty = document.createElement("p");
+          empty.className = "muted";
+          empty.textContent = "Generate a sample to see the four choices.";
+          choiceButtons.append(empty);
+          return;
+        }
+
+        for (const choice of currentChoices) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "choice-button";
+          button.dataset.value = choice.value;
+          button.textContent = choice.value;
+          button.addEventListener("click", () => {
+            if (choiceResolved) {
+              return;
+            }
+
+            choiceResolved = true;
+            const isCorrect = choice.value === currentSample.answerNormalized;
+
+            for (const optionButton of choiceButtons.querySelectorAll("button")) {
+              const optionValue = optionButton.dataset.value;
+              optionButton.disabled = true;
+
+              if (optionValue === currentSample.answerNormalized) {
+                optionButton.classList.add("correct");
+              } else if (optionValue === choice.value) {
+                optionButton.classList.add("incorrect");
+              }
+            }
+
+            if (isCorrect) {
+              setFeedback("Correct. You picked the right answer.", "correct");
+            } else {
+              setFeedback(`Incorrect. Correct answer: ${currentSample.answer}.`, "incorrect");
+            }
+          });
+          choiceButtons.append(button);
+        }
+      }
+
+      function renderSample(sample) {
+        modeOutput.textContent = sample.label;
+        instructionOutput.textContent = sample.instruction;
+        answerRevealed = false;
+        choiceResolved = false;
+        revealButton.disabled = false;
+        replayButton.disabled = false;
+        answerInput.value = "";
+        updateAnswerVisibility();
+        renderChoices();
+      }
+
+      async function playCurrentSample() {
+        if (!currentSample) {
+          return;
+        }
+
+        const playbackOptions = getPlaybackOptions();
+        const radioLabel = playbackOptions.radioTone ? " with radio tone" : "";
+        setStatus(
+          `Requesting ${playbackOptions.accent} audio at ${playbackOptions.speakingRate.toFixed(2)}x${radioLabel} from /api/tts...`
+        );
+
+        const audioUrl = await fetchTtsAudioUrl(currentSample.spokenPhrase, playbackOptions);
         audioPlayer.src = audioUrl;
         audioPlayer.currentTime = 0;
         await audioPlayer.play();
-        setStatus("Playing audio.");
+        setStatus(playbackOptions.radioTone ? "Playing radio-processed audio." : "Playing audio.");
+      }
+
+      function markTypedAnswer() {
+        if (!currentSample) {
+          setFeedback("Generate a sample first.", "idle");
+          return;
+        }
+
+        const normalizedInput = normalizeAnswerInput(answerInput.value);
+
+        if (!normalizedInput) {
+          setFeedback("Type an answer before checking.", "idle");
+          return;
+        }
+
+        if (currentSample.acceptedAnswersNormalized.includes(normalizedInput)) {
+          setFeedback("Correct. Answer accepted.", "correct");
+          return;
+        }
+
+        setFeedback(`Incorrect. Correct answer: ${currentSample.answer}.`, "incorrect");
       }
 
       async function generateAndPlay() {
         generateButton.disabled = true;
         replayButton.disabled = true;
+        revealButton.disabled = true;
+        setFeedback("Generating a new sample...", "idle");
 
         try {
-          currentSample = buildCallsignSample();
+          const generationOptions = getGenerationOptions();
+          currentSample = buildCallsignSample(generationOptions);
+          currentChoices = buildAnswerChoices(currentSample, {
+            count: 4,
+            customLetters: normalizeCustomLetterSet(generationOptions.customLetters)
+          });
           renderSample(currentSample);
-          await playPhrase(currentSample.spokenPhrase);
-          replayButton.disabled = false;
+          await playCurrentSample();
+
+          if (answerModeSelect.value === "typed") {
+            answerInput.focus();
+            answerInput.select();
+          }
         } catch (error) {
           setStatus(error instanceof Error ? error.message : "Audio generation failed.");
+          setFeedback("Could not generate audio for this sample.", "incorrect");
         } finally {
           generateButton.disabled = false;
         }
       }
+
+      practiceModeSelect.addEventListener("change", () => {
+        updateControlState();
+      });
+
+      answerModeSelect.addEventListener("change", () => {
+        renderChoices();
+        setFeedback(
+          answerModeSelect.value === "typed"
+            ? "Answer mode switched to typing."
+            : "Answer mode switched to 4 similar choices.",
+          "idle"
+        );
+      });
+
+      customLettersInput.addEventListener("input", () => {
+        customLettersInput.value = cleanCustomLettersInput(customLettersInput.value);
+      });
+
+      letterLengthInput.addEventListener("change", () => {
+        const value = Number(letterLengthInput.value) || 4;
+        letterLengthInput.value = String(Math.min(8, Math.max(2, value)));
+      });
+
+      speakingRateInput.addEventListener("input", () => {
+        updateSpeakingRateOutput();
+        updateControlState();
+      });
+
+      radioToneCheckbox.addEventListener("change", () => {
+        updateControlState();
+      });
 
       generateButton.addEventListener("click", () => {
         void generateAndPlay();
       });
 
       replayButton.addEventListener("click", async () => {
-        if (!currentSample) {
-          return;
-        }
-
         try {
-          await playPhrase(currentSample.spokenPhrase);
+          await playCurrentSample();
         } catch (error) {
           setStatus(error instanceof Error ? error.message : "Replay failed.");
+          setFeedback("Replay failed.", "incorrect");
+        }
+      });
+
+      revealButton.addEventListener("click", () => {
+        answerRevealed = !answerRevealed;
+        updateAnswerVisibility();
+      });
+
+      checkButton.addEventListener("click", () => {
+        markTypedAnswer();
+      });
+
+      answerInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          markTypedAnswer();
         }
       });
 
       window.addEventListener("beforeunload", () => {
         clearTtsAudioCache();
       });
+
+      updateSpeakingRateOutput();
+      updateControlState();
+      renderChoices();
     </script>
   </body>
 </html>

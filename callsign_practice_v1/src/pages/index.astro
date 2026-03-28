@@ -1,0 +1,1234 @@
+---
+import "../styles/practice-shell.css";
+import "../styles/practice-session.css";
+import "../styles/practice-feedback.css";
+import "../styles/practice-motion.css";
+
+const pageTitle = "Aviation Callsign Dictation";
+const accentOptions = [
+  { value: "mixed", label: "Mixed English" },
+  { value: "american", label: "American English" },
+  { value: "british", label: "British English" },
+  { value: "australian", label: "Australian English" },
+  { value: "indian", label: "Indian English" }
+];
+const answerModes = [
+  { value: "typed", label: "Type the answer" },
+  { value: "multipleChoice", label: "Choose from 4 similar options" }
+];
+const defaultSpeakingRate = 1.2;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+  </head>
+  <body>
+    <main class="practice-app">
+      <section class="panel hero">
+        <div>
+          <p class="eyebrow">Flight Deck Training</p>
+          <h1>{pageTitle}</h1>
+          <p class="hero-copy">
+            Listen first, answer fast, and keep the rhythm through a 10-callsign round. The page now
+            centers the transmission, the answer moment, and the feedback loop instead of feeling like a
+            settings form with audio controls.
+          </p>
+        </div>
+
+        <aside class="hero-note" aria-label="Quick onboarding">
+          <p class="eyebrow">Quick Start</p>
+          <h3>Listen. Answer. Continue.</h3>
+          <p class="supporting-text">
+            Recommended setup: General Aviation, typed answers, mixed English, 1.20x, radio tone on.
+          </p>
+          <p class="supporting-text">One round is 10 callsigns with live streak and accuracy tracking.</p>
+        </aside>
+      </section>
+
+      <section class="panel session-bar" aria-label="Session status">
+        <div class="session-stat">
+          <span class="session-stat-label">Mode</span>
+          <strong id="sessionModeValue" class="session-stat-value">General Aviation</strong>
+        </div>
+        <div class="session-stat">
+          <span class="session-stat-label">Progress</span>
+          <strong id="progressValue" class="session-stat-value">0 / 10</strong>
+        </div>
+        <div class="session-stat">
+          <span class="session-stat-label">Streak</span>
+          <strong id="streakValue" class="session-stat-value">0</strong>
+        </div>
+        <div class="session-stat">
+          <span class="session-stat-label">Accuracy</span>
+          <strong id="accuracyValue" class="session-stat-value">0%</strong>
+        </div>
+      </section>
+
+      <div class="practice-grid">
+        <aside class="panel settings-panel">
+          <div class="settings-header">
+            <p class="eyebrow">Practice Setup</p>
+            <h2>Quick controls</h2>
+            <p class="settings-copy">
+              Keep the main path simple. The essential choices stay visible here, and the extra tuning
+              lives in advanced settings.
+            </p>
+          </div>
+
+          <div class="settings-grid">
+            <label>
+              Practice mode
+              <select id="practiceMode">
+                <option value="transport">Transport airline</option>
+                <option value="generalAviation" selected>General aviation</option>
+                <option value="numeric">Numeric only</option>
+                <option value="letters">Custom letters</option>
+              </select>
+            </label>
+
+            <label>
+              Answer mode
+              <select id="answerMode">
+                {answerModes.map((mode) => (
+                  <option value={mode.value}>{mode.label}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <details class="advanced-settings">
+            <summary>Advanced settings</summary>
+            <div class="advanced-settings-body">
+              <label>
+                Accent
+                <select id="accentSelect">
+                  {accentOptions.map((accent) => (
+                    <option value={accent.value}>{accent.label}</option>
+                  ))}
+                </select>
+              </label>
+
+              <label>
+                Custom letters
+                <input id="customLetters" type="text" maxlength="26" placeholder="Example: ABCXYZ" />
+              </label>
+
+              <label>
+                Letter length
+                <input id="letterLength" type="number" min="2" max="8" value="4" />
+              </label>
+
+              <label>
+                Speaking rate
+                <input
+                  id="speakingRate"
+                  type="range"
+                  min="0.25"
+                  max="2"
+                  step="0.05"
+                  value={defaultSpeakingRate}
+                />
+                <span class="range-meta">
+                  <span>Google TTS range: 0.25x to 2.00x</span>
+                  <strong id="speakingRateValue">{defaultSpeakingRate.toFixed(2)}x</strong>
+                </span>
+              </label>
+
+              <label class="toggle-row">
+                <input id="radioToneCheckbox" type="checkbox" checked />
+                <span>Simulate aviation radio tone after synthesis</span>
+              </label>
+
+              <label class="toggle-row">
+                <input id="soundCheckbox" type="checkbox" checked />
+                <span>UI sound feedback</span>
+              </label>
+
+              <label class="toggle-row">
+                <input id="vibrationCheckbox" type="checkbox" checked />
+                <span>Vibration feedback on supported devices</span>
+              </label>
+            </div>
+          </details>
+
+          <p id="controlHint" class="helper-text">
+            General Aviation and Custom Letters use the custom letter pool when letters are generated.
+          </p>
+        </aside>
+
+        <section class="practice-main">
+          <section id="roundCard" class="panel round-card" data-question-state="idle">
+            <div class="round-header">
+              <div class="chip-row">
+                <span class="chip">Current mode <strong id="modeChipValue">General Aviation</strong></span>
+                <span class="chip">Round <strong id="roundChipValue">1 / 10</strong></span>
+              </div>
+
+              <div class="chip-row">
+                <span class="chip">Voice <strong id="voiceChipValue">Mixed English • 1.20x • Radio</strong></span>
+              </div>
+            </div>
+
+            <div class="signal-stage">
+              <div class="signal-visual" aria-hidden="true">
+                <div class="signal-ring"></div>
+                <div class="signal-sweep"></div>
+                <div class="signal-bars">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+              </div>
+
+              <div class="signal-copy">
+                <p id="statusEyebrow" class="eyebrow">Ready</p>
+                <h2 id="instructionOutput">Ready for your first callsign?</h2>
+                <p id="statusOutput" class="status-copy">
+                  Start the round to hear the first transmission. Replay stays available after each
+                  playback, and the answer stays hidden unless you reveal it.
+                </p>
+                <div id="transmissionMeta" class="transmission-meta"></div>
+              </div>
+            </div>
+
+            <div class="round-controls">
+              <button id="primaryActionButton" type="button" class="primary-button">Play Callsign</button>
+              <button id="replayButton" type="button" class="secondary-button" disabled>Play Again</button>
+              <button id="revealButton" type="button" class="ghost-button" disabled>Show Answer</button>
+            </div>
+
+            <div id="answerRevealBox" class="answer-reveal" hidden>
+              <span class="answer-reveal-label">Answer</span>
+              <strong id="answerOutput" class="answer-reveal-value">Hidden</strong>
+              <p id="phraseOutput" class="supporting-text">Spoken phrase stays hidden during practice.</p>
+            </div>
+          </section>
+
+          <section id="answerPanel" class="panel answer-panel" data-answer-mode="typed">
+            <div class="answer-panel-header">
+              <p class="eyebrow">Your Answer</p>
+              <h2 id="answerHeading">Type what you heard.</h2>
+              <p id="answerGuidance" class="answer-guidance">
+                Start the round, then type the answer and press Enter or Check.
+              </p>
+            </div>
+
+            <div id="answerModeShell" class="answer-mode-shell" data-ready="false">
+              <div id="typedSection" class="typed-shell">
+                <label class="sr-only" for="answerInput">Type the callsign answer</label>
+                <input
+                  id="answerInput"
+                  class="typed-answer"
+                  type="text"
+                  placeholder="Type the answer"
+                  autocomplete="off"
+                  autocapitalize="characters"
+                  spellcheck="false"
+                  data-answer-state="locked"
+                />
+              </div>
+
+              <div id="choiceSection" class="choice-shell" hidden>
+                <div id="choiceButtons" class="choice-grid" role="listbox" aria-label="Answer choices"></div>
+              </div>
+            </div>
+          </section>
+
+          <section
+            id="feedbackPanel"
+            class="panel feedback-panel"
+            data-feedback-tone="neutral"
+            data-feedback-state="idle"
+            aria-live="polite"
+          >
+            <p id="feedbackEyebrow" class="eyebrow">Ready</p>
+            <h2 id="feedbackHeadline" class="feedback-headline">Ready for your first callsign?</h2>
+            <p id="feedbackDetail" class="feedback-detail">
+              Listen to the transmission, answer it, and use the next prompt to keep the rhythm moving.
+            </p>
+            <div id="feedbackAnswerCard" class="answer-reveal feedback-answer-card" hidden>
+              <span id="feedbackAnswerLabel" class="answer-reveal-label">Full callsign</span>
+              <strong id="feedbackAnswerValue" class="answer-reveal-value">CA1234</strong>
+              <p id="feedbackAnswerMeta" class="supporting-text">Expected answer: 1234</p>
+              <p id="feedbackPhraseDetail" class="supporting-text">Pronunciation: Air China twelve thirty four</p>
+            </div>
+            <p id="feedbackSupport" class="feedback-support">One round is 10 callsigns.</p>
+          </section>
+
+          <section id="sessionSummaryPanel" class="panel summary-panel" hidden>
+            <p class="eyebrow">Round Summary</p>
+            <h2>Session complete</h2>
+
+            <div class="summary-grid">
+              <div class="summary-card">
+                <span>Completed</span>
+                <strong id="summaryCompleted">10 callsigns completed</strong>
+              </div>
+              <div class="summary-card">
+                <span>Accuracy</span>
+                <strong id="summaryAccuracy">0% accuracy</strong>
+              </div>
+              <div class="summary-card">
+                <span>Best streak</span>
+                <strong id="summaryBestStreak">0</strong>
+              </div>
+            </div>
+
+            <p id="summaryEncouragement" class="summary-note">
+              Start another round when you want a fresh set of callsigns.
+            </p>
+          </section>
+        </section>
+      </div>
+
+      <div id="toastHost" class="toast-stack" aria-live="polite" aria-atomic="true"></div>
+      <audio id="audioPlayer" preload="none" hidden></audio>
+    </main>
+
+    <script>
+      import {
+        buildAnswerChoices,
+        buildCallsignSample,
+        normalizeCustomLetterSet
+      } from "../lib/callsign.js";
+      import { clearTtsAudioCache, fetchTtsAudioUrl } from "../lib/tts-client.js";
+      import {
+        applyAnswerResult,
+        buildSessionSummary,
+        createPracticeSession,
+        getSessionProgressText,
+        isSessionComplete
+      } from "../lib/practice-session.js";
+      import {
+        QUESTION_STATES,
+        canSubmitAnswer,
+        getChoiceState,
+        isMultipleChoiceMode,
+        resolveRoundAnswer
+      } from "../lib/answer-flow.js";
+      import {
+        buildFeedbackViewModel,
+        buildSessionCompleteViewModel,
+        FEEDBACK_STATES,
+        getProgressMilestoneMessage,
+        getStreakMilestoneMessage
+      } from "../lib/ui-feedback.js";
+      import { fadeOut, pop, pulse, shake, slideIn } from "../lib/ui-animations.js";
+      import {
+        createUiAudioController,
+        resetUiAudioContext,
+        supportsUiAudio,
+        supportsUiVibration
+      } from "../lib/ui-audio.js";
+
+      const practiceModeSelect = document.querySelector("#practiceMode");
+      const answerModeSelect = document.querySelector("#answerMode");
+      const accentSelect = document.querySelector("#accentSelect");
+      const customLettersInput = document.querySelector("#customLetters");
+      const letterLengthInput = document.querySelector("#letterLength");
+      const speakingRateInput = document.querySelector("#speakingRate");
+      const speakingRateValue = document.querySelector("#speakingRateValue");
+      const radioToneCheckbox = document.querySelector("#radioToneCheckbox");
+      const soundCheckbox = document.querySelector("#soundCheckbox");
+      const vibrationCheckbox = document.querySelector("#vibrationCheckbox");
+      const controlHint = document.querySelector("#controlHint");
+      const sessionModeValue = document.querySelector("#sessionModeValue");
+      const progressValue = document.querySelector("#progressValue");
+      const streakValue = document.querySelector("#streakValue");
+      const accuracyValue = document.querySelector("#accuracyValue");
+      const roundCard = document.querySelector("#roundCard");
+      const modeChipValue = document.querySelector("#modeChipValue");
+      const roundChipValue = document.querySelector("#roundChipValue");
+      const voiceChipValue = document.querySelector("#voiceChipValue");
+      const statusEyebrow = document.querySelector("#statusEyebrow");
+      const instructionOutput = document.querySelector("#instructionOutput");
+      const statusOutput = document.querySelector("#statusOutput");
+      const transmissionMeta = document.querySelector("#transmissionMeta");
+      const primaryActionButton = document.querySelector("#primaryActionButton");
+      const replayButton = document.querySelector("#replayButton");
+      const revealButton = document.querySelector("#revealButton");
+      const answerRevealBox = document.querySelector("#answerRevealBox");
+      const answerOutput = document.querySelector("#answerOutput");
+      const phraseOutput = document.querySelector("#phraseOutput");
+      const answerPanel = document.querySelector("#answerPanel");
+      const answerHeading = document.querySelector("#answerHeading");
+      const answerGuidance = document.querySelector("#answerGuidance");
+      const answerModeShell = document.querySelector("#answerModeShell");
+      const answerInput = document.querySelector("#answerInput");
+      const typedSection = document.querySelector("#typedSection");
+      const choiceSection = document.querySelector("#choiceSection");
+      const choiceButtons = document.querySelector("#choiceButtons");
+      const feedbackPanel = document.querySelector("#feedbackPanel");
+      const feedbackEyebrow = document.querySelector("#feedbackEyebrow");
+      const feedbackHeadline = document.querySelector("#feedbackHeadline");
+      const feedbackDetail = document.querySelector("#feedbackDetail");
+      const feedbackAnswerCard = document.querySelector("#feedbackAnswerCard");
+      const feedbackAnswerLabel = document.querySelector("#feedbackAnswerLabel");
+      const feedbackAnswerValue = document.querySelector("#feedbackAnswerValue");
+      const feedbackAnswerMeta = document.querySelector("#feedbackAnswerMeta");
+      const feedbackPhraseDetail = document.querySelector("#feedbackPhraseDetail");
+      const feedbackSupport = document.querySelector("#feedbackSupport");
+      const sessionSummaryPanel = document.querySelector("#sessionSummaryPanel");
+      const summaryCompleted = document.querySelector("#summaryCompleted");
+      const summaryAccuracy = document.querySelector("#summaryAccuracy");
+      const summaryBestStreak = document.querySelector("#summaryBestStreak");
+      const summaryEncouragement = document.querySelector("#summaryEncouragement");
+      const toastHost = document.querySelector("#toastHost");
+      const audioPlayer = document.querySelector("#audioPlayer");
+
+      let sessionState = createPracticeSession({ targetCount: 10 });
+      let currentSample = null;
+      let currentChoices = [];
+      let currentResolution = null;
+      let questionState = QUESTION_STATES.IDLE;
+      let answerRevealed = false;
+      let selectedChoiceValue = "";
+      let transientFeedback = null;
+      let primaryActionPending = false;
+
+      const uiAudioController = createUiAudioController({
+        soundEnabled: soundCheckbox.checked,
+        vibrationEnabled: vibrationCheckbox.checked
+      });
+
+      function wait(duration) {
+        return new Promise((resolve) => window.setTimeout(resolve, duration));
+      }
+
+      function cleanCustomLettersInput(value) {
+        return Array.from(
+          new Set(
+            String(value ?? "")
+              .toUpperCase()
+              .replace(/[^A-Z]/g, "")
+              .split("")
+          )
+        ).join("");
+      }
+
+      function cleanTypedAnswer(value) {
+        return String(value ?? "")
+          .toUpperCase()
+          .replace(/[^A-Z0-9 -]/g, "");
+      }
+
+      function normalizeSpeakingRate(value) {
+        const parsed = Number(value);
+
+        if (!Number.isFinite(parsed)) {
+          return 1.2;
+        }
+
+        return Math.min(2, Math.max(0.25, parsed));
+      }
+
+      function getSelectedModeLabel() {
+        return practiceModeSelect.options[practiceModeSelect.selectedIndex]?.textContent ?? "General aviation";
+      }
+
+      function getSelectedAccentLabel() {
+        return accentSelect.options[accentSelect.selectedIndex]?.textContent ?? "Mixed English";
+      }
+
+      function getPlaybackOptions() {
+        return {
+          accent: accentSelect.value,
+          speakingRate: normalizeSpeakingRate(speakingRateInput.value),
+          radioTone: radioToneCheckbox.checked
+        };
+      }
+
+      function getPlaybackLabel() {
+        const options = getPlaybackOptions();
+        return `${getSelectedAccentLabel()} • ${options.speakingRate.toFixed(2)}x • ${options.radioTone ? "Radio" : "Clean"}`;
+      }
+
+      function getGenerationOptions() {
+        const customLetters = cleanCustomLettersInput(customLettersInput.value);
+
+        return {
+          mode: practiceModeSelect.value,
+          customLetters,
+          letterLength: Number(letterLengthInput.value) || 4
+        };
+      }
+
+      function getCanSubmitCurrentAnswer() {
+        return canSubmitAnswer(answerModeSelect.value, answerInput.value, selectedChoiceValue);
+      }
+
+      function getPrimaryActionLabel() {
+        if (questionState === QUESTION_STATES.IDLE) {
+          return "Play Callsign";
+        }
+
+        if (questionState === QUESTION_STATES.PREPARING) {
+          return "Preparing transmission...";
+        }
+
+        if (questionState === QUESTION_STATES.LISTENING) {
+          return "Listening...";
+        }
+
+        if (questionState === QUESTION_STATES.CHECKING) {
+          return "Checking...";
+        }
+
+        if (questionState === QUESTION_STATES.RESOLVED) {
+          return "Next Callsign";
+        }
+
+        if (questionState === QUESTION_STATES.SESSION_COMPLETE) {
+          return "Start Another Round";
+        }
+
+        return isMultipleChoiceMode(answerModeSelect.value) ? "Choose an option" : "Check";
+      }
+
+      function getStatusEyebrowText() {
+        if (questionState === QUESTION_STATES.PREPARING) return "Preparing transmission";
+        if (questionState === QUESTION_STATES.LISTENING) return "Listening";
+        if (questionState === QUESTION_STATES.CHECKING) return "Checking";
+        if (questionState === QUESTION_STATES.SESSION_COMPLETE) return "Round complete";
+        if (currentResolution) return currentResolution.isCorrect ? "Correct" : "Not quite";
+        if (currentSample) return "Your turn";
+        return "Ready";
+      }
+
+      function getInstructionHeading() {
+        if (questionState === QUESTION_STATES.SESSION_COMPLETE) return "Round complete.";
+        if (currentResolution) return currentResolution.isCorrect ? "Transmission copied." : "Review the answer and continue.";
+        if (currentSample) return currentSample.instruction;
+        return "Ready for your first callsign?";
+      }
+
+      function getRoundStatusCopy() {
+        if (questionState === QUESTION_STATES.PREPARING) {
+          return "Building the next callsign and tuning the voice channel.";
+        }
+
+        if (questionState === QUESTION_STATES.LISTENING) {
+          return `Stay on the transmission. ${getPlaybackLabel()}.`;
+        }
+
+        if (questionState === QUESTION_STATES.CHECKING) {
+          return "Short pause while the round resolves.";
+        }
+
+        if (questionState === QUESTION_STATES.SESSION_COMPLETE) {
+          return "Your 10-callsign round is complete. Review the summary below or launch another round right away.";
+        }
+
+        if (currentResolution) {
+          return currentResolution.isCorrect
+            ? "Good copy. The full answer is shown below before you move on."
+            : "The full answer is shown below. Replay once if you want one more listen before the next callsign.";
+        }
+
+        if (currentSample) {
+          return "Answer as soon as the transmission ends. Replay stays available whenever you need another pass.";
+        }
+
+        return "Start the round to hear the first transmission. Replay stays available after each playback, and the answer stays hidden unless you reveal it.";
+      }
+
+      function getTransmissionMetaItems() {
+        const items = [];
+        items.push(`Answer mode: ${answerModeSelect.value === "typed" ? "Type" : "4 choices"}`);
+        items.push(getPlaybackLabel());
+
+        if (currentSample) {
+          items.push(currentSample.label);
+        }
+
+        return items;
+      }
+
+      function getFeedbackModel() {
+        if (transientFeedback) {
+          return transientFeedback;
+        }
+
+        if (questionState === QUESTION_STATES.SESSION_COMPLETE) {
+          return buildSessionCompleteViewModel({
+            completedCount: sessionState.completedCount,
+            accuracy: sessionState.accuracy,
+            bestStreak: sessionState.bestStreak,
+            detail: buildSessionSummary(sessionState, getSelectedModeLabel()).encouragement
+          });
+        }
+
+        if (currentResolution) {
+          const submittedValue = currentResolution.submittedValue?.trim();
+
+          return buildFeedbackViewModel({
+            state: currentResolution.isCorrect ? FEEDBACK_STATES.CORRECT : FEEDBACK_STATES.INCORRECT,
+            correctAnswer: currentSample?.answer,
+            detail: currentResolution.isCorrect
+              ? "Copied correctly."
+              : submittedValue
+                ? `Your answer: ${submittedValue}`
+                : "Compare your answer with the card below."
+          });
+        }
+
+        if (questionState === QUESTION_STATES.PREPARING) {
+          return buildFeedbackViewModel({
+            state: FEEDBACK_STATES.PREPARING,
+            detail: "Tuning voice channel..."
+          });
+        }
+
+        if (questionState === QUESTION_STATES.LISTENING) {
+          return buildFeedbackViewModel({
+            state: FEEDBACK_STATES.LISTENING,
+            detail: "Listen first, then answer."
+          });
+        }
+
+        if (questionState === QUESTION_STATES.CHECKING) {
+          return buildFeedbackViewModel({
+            state: FEEDBACK_STATES.CHECKING
+          });
+        }
+
+        if (currentSample) {
+          return buildFeedbackViewModel({
+            state: FEEDBACK_STATES.IDLE,
+            headline: "Your turn",
+            detail: isMultipleChoiceMode(answerModeSelect.value)
+              ? selectedChoiceValue
+                ? "Selection locked. Checking your answer..."
+                : "Choose the closest match. It will check automatically."
+              : getCanSubmitCurrentAnswer()
+                ? "Input ready. Press Check or Enter."
+                : "Type the answer you heard, then press Check."
+          });
+        }
+
+        return buildFeedbackViewModel({
+          state: FEEDBACK_STATES.IDLE,
+          headline: "Ready for your first callsign?",
+          detail: "Listen to the transmission, answer it, and use the next prompt to keep the rhythm moving."
+        });
+      }
+
+      function getFeedbackSupportCopy() {
+        if (questionState === QUESTION_STATES.SESSION_COMPLETE) {
+          return "Use Start Another Round for a fresh 10-callsign session.";
+        }
+
+        if (currentResolution) {
+          return currentResolution.isCorrect
+            ? "Keep the rhythm moving with Next Callsign."
+            : "One miss does not hurt the round. Keep going.";
+        }
+
+        if (currentSample) {
+          return sessionState.currentStreak > 0
+            ? `${sessionState.currentStreak} in a row. Keep it going.`
+            : "One round is 10 callsigns.";
+        }
+
+        return "One round is 10 callsigns.";
+      }
+
+      function getAnswerHeading() {
+        if (questionState === QUESTION_STATES.SESSION_COMPLETE) {
+          return "Round complete";
+        }
+
+        return isMultipleChoiceMode(answerModeSelect.value) ? "Choose the closest match." : "Type what you heard.";
+      }
+
+      function getAnswerGuidanceCopy() {
+        if (questionState === QUESTION_STATES.SESSION_COMPLETE) {
+          return "Start another round when you are ready.";
+        }
+
+        if (!currentSample) {
+          return isMultipleChoiceMode(answerModeSelect.value)
+            ? "Start the round, then select one answer to check automatically."
+            : "Start the round, then type the answer and press Enter or Check.";
+        }
+
+        if (currentResolution) {
+          return currentResolution.isCorrect
+            ? "Correct answer locked in. Move on when you are ready."
+            : "Replay once if you want another listen before moving on.";
+        }
+
+        return isMultipleChoiceMode(answerModeSelect.value)
+          ? selectedChoiceValue
+            ? "Selection received. Checking automatically."
+            : "Pick one option to check it immediately."
+          : getCanSubmitCurrentAnswer()
+            ? "Input ready. Press Enter or Check."
+            : "Type the answer, then press Check.";
+      }
+
+      function getAnswerStateAttribute() {
+        if (
+          questionState === QUESTION_STATES.PREPARING ||
+          questionState === QUESTION_STATES.LISTENING ||
+          questionState === QUESTION_STATES.CHECKING ||
+          questionState === QUESTION_STATES.SESSION_COMPLETE
+        ) {
+          return "locked";
+        }
+
+        if (currentResolution?.isCorrect) return "correct";
+        if (currentResolution) return "incorrect";
+        return "idle";
+      }
+
+      function showToast(message, tone = "neutral") {
+        if (!message) {
+          return;
+        }
+
+        const toast = document.createElement("div");
+        toast.className = "toast";
+        toast.dataset.tone = tone;
+        toast.textContent = message;
+        toastHost.append(toast);
+        slideIn(toast);
+
+        window.setTimeout(() => {
+          fadeOut(toast, { duration: 180 });
+          window.setTimeout(() => {
+            toast.remove();
+          }, 220);
+        }, 2600);
+      }
+
+      function focusAnswerArea() {
+        if (questionState !== QUESTION_STATES.ANSWERING || !currentSample) {
+          return;
+        }
+
+        if (isMultipleChoiceMode(answerModeSelect.value)) {
+          const firstChoice = choiceButtons.querySelector("button:not(:disabled)");
+          firstChoice?.focus();
+          return;
+        }
+
+        answerInput.focus();
+        answerInput.select();
+      }
+
+      function clearTransientFeedback() {
+        transientFeedback = null;
+      }
+
+      function setTransientFeedback(headline, detail, tone = FEEDBACK_STATES.IDLE) {
+        transientFeedback = buildFeedbackViewModel({
+          state: tone,
+          headline,
+          detail
+        });
+      }
+
+      function renderSpeakingRateOutput() {
+        const speakingRate = normalizeSpeakingRate(speakingRateInput.value);
+        speakingRateValue.textContent = `${speakingRate.toFixed(2)}x`;
+      }
+
+      function renderControlState() {
+        const mode = practiceModeSelect.value;
+        const usesCustomLetters = mode === "generalAviation" || mode === "letters";
+        const usesLetterLength = mode === "letters";
+        const playbackOptions = getPlaybackOptions();
+        const soundSupported = supportsUiAudio();
+        const vibrationSupported = supportsUiVibration();
+
+        customLettersInput.disabled = !usesCustomLetters;
+        letterLengthInput.disabled = !usesLetterLength;
+        soundCheckbox.disabled = !soundSupported;
+        vibrationCheckbox.disabled = !vibrationSupported;
+
+        if (mode === "transport") {
+          controlHint.textContent = "Transport mode reads the airline name out loud, but the expected answer is only the flight number.";
+        } else if (mode === "generalAviation") {
+          controlHint.textContent = "General Aviation uses aircraft type plus a 3-character suffix. The custom letter pool affects the letter characters.";
+        } else if (mode === "numeric") {
+          controlHint.textContent = "Numeric mode generates a 4-digit callsign pronounced in grouped aviation style.";
+        } else {
+          controlHint.textContent = "Custom Letters uses the custom letter pool and the length control for pure letter dictation.";
+        }
+
+        controlHint.textContent += ` Current speech rate: ${playbackOptions.speakingRate.toFixed(2)}x.${playbackOptions.radioTone ? " Radio post-processing is enabled." : " Radio post-processing is disabled."}`;
+
+        if (!soundSupported) {
+          controlHint.textContent += " UI sound is unavailable in this browser.";
+        }
+
+        if (!vibrationSupported) {
+          controlHint.textContent += " Vibration is unavailable on this device.";
+        }
+      }
+
+      function renderTransmissionMeta() {
+        transmissionMeta.innerHTML = "";
+
+        for (const item of getTransmissionMetaItems()) {
+          const badge = document.createElement("span");
+          badge.className = "chip";
+          badge.textContent = item;
+          transmissionMeta.append(badge);
+        }
+      }
+
+      function renderAnswerReveal() {
+        const canRevealBeforeAnswer = Boolean(currentSample) && !currentResolution;
+
+        revealButton.hidden = !canRevealBeforeAnswer;
+        revealButton.disabled = !canRevealBeforeAnswer;
+        revealButton.textContent = answerRevealed ? "Hide Answer" : "Show Answer";
+        answerRevealBox.hidden = !canRevealBeforeAnswer || !answerRevealed;
+
+        if (!currentSample) {
+          answerOutput.textContent = "Hidden";
+          phraseOutput.textContent = "Spoken phrase stays hidden during practice.";
+          return;
+        }
+
+        answerOutput.textContent = currentSample.revealAnswer;
+        phraseOutput.textContent = `Spoken phrase: ${currentSample.spokenPhrase}`;
+      }
+
+      function renderChoices() {
+        choiceButtons.innerHTML = "";
+
+        if (!currentSample) {
+          return;
+        }
+
+        for (const choice of currentChoices) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "choice-card";
+          button.dataset.value = choice.value;
+          button.textContent = choice.value;
+
+          if (currentResolution) {
+            button.dataset.choiceState = getChoiceState(choice.value, currentResolution);
+          } else if (choice.value === selectedChoiceValue) {
+            button.dataset.choiceState = "selected";
+          } else {
+            button.dataset.choiceState = "idle";
+          }
+
+          button.setAttribute("aria-pressed", choice.value === selectedChoiceValue ? "true" : "false");
+          button.disabled = questionState !== QUESTION_STATES.ANSWERING || Boolean(currentResolution);
+          button.addEventListener("click", () => {
+            if (questionState !== QUESTION_STATES.ANSWERING || currentResolution) {
+              return;
+            }
+
+            clearTransientFeedback();
+            selectedChoiceValue = choice.value;
+            renderApp();
+            void submitCurrentAnswer();
+          });
+          choiceButtons.append(button);
+        }
+      }
+
+      function renderSessionStats() {
+        sessionModeValue.textContent = getSelectedModeLabel();
+        progressValue.textContent = getSessionProgressText(sessionState);
+        streakValue.textContent = String(sessionState.currentStreak);
+        accuracyValue.textContent = `${sessionState.accuracy}%`;
+      }
+
+      function renderRoundCard() {
+        roundCard.dataset.questionState = questionState;
+        modeChipValue.textContent = currentSample?.label ?? getSelectedModeLabel();
+        roundChipValue.textContent = `${Math.min(sessionState.completedCount + 1, sessionState.targetCount)} / ${sessionState.targetCount}`;
+        voiceChipValue.textContent = getPlaybackLabel();
+        statusEyebrow.textContent = getStatusEyebrowText();
+        instructionOutput.textContent = getInstructionHeading();
+        statusOutput.textContent = getRoundStatusCopy();
+        renderTransmissionMeta();
+      }
+
+      function renderAnswerPanel() {
+        answerPanel.dataset.answerMode = answerModeSelect.value;
+        answerHeading.textContent = getAnswerHeading();
+        answerGuidance.textContent = getAnswerGuidanceCopy();
+        answerModeShell.dataset.ready = String(getCanSubmitCurrentAnswer());
+        typedSection.hidden = isMultipleChoiceMode(answerModeSelect.value);
+        choiceSection.hidden = !isMultipleChoiceMode(answerModeSelect.value);
+        answerInput.disabled =
+          !currentSample ||
+          questionState === QUESTION_STATES.PREPARING ||
+          questionState === QUESTION_STATES.LISTENING ||
+          questionState === QUESTION_STATES.CHECKING ||
+          questionState === QUESTION_STATES.SESSION_COMPLETE ||
+          Boolean(currentResolution);
+        answerInput.dataset.answerState = getAnswerStateAttribute();
+
+        renderChoices();
+      }
+
+      function renderFeedbackPanel() {
+        const feedbackModel = getFeedbackModel();
+        feedbackPanel.dataset.feedbackTone = feedbackModel.tone;
+        feedbackPanel.dataset.feedbackState = feedbackModel.state;
+        feedbackEyebrow.textContent = feedbackModel.headline;
+        feedbackHeadline.textContent = feedbackModel.headline;
+        feedbackDetail.textContent = feedbackModel.detail;
+        renderFeedbackAnswerCard();
+        feedbackSupport.textContent = getFeedbackSupportCopy();
+      }
+
+      function renderFeedbackAnswerCard() {
+        const shouldShowFeedbackAnswer = Boolean(currentSample && currentResolution);
+        feedbackAnswerCard.hidden = !shouldShowFeedbackAnswer;
+
+        if (!shouldShowFeedbackAnswer) {
+          feedbackAnswerLabel.textContent = "Full callsign";
+          feedbackAnswerValue.textContent = "Hidden";
+          feedbackAnswerMeta.textContent = "";
+          feedbackPhraseDetail.textContent = "";
+          return;
+        }
+
+        const hasDistinctExpectedAnswer =
+          String(currentSample.answer ?? "").trim() !== String(currentSample.callsign ?? "").trim();
+
+        feedbackAnswerLabel.textContent = "Full callsign";
+        feedbackAnswerValue.textContent = currentSample.callsign;
+        feedbackAnswerMeta.textContent = hasDistinctExpectedAnswer
+          ? `Expected answer: ${currentSample.answer}`
+          : currentSample.instruction;
+        feedbackPhraseDetail.textContent = `Pronunciation: ${currentSample.spokenPhrase}`;
+      }
+
+      function renderSummaryPanel() {
+        const showSummary = questionState === QUESTION_STATES.SESSION_COMPLETE;
+        sessionSummaryPanel.hidden = !showSummary;
+
+        if (!showSummary) {
+          return;
+        }
+
+        const summary = buildSessionSummary(sessionState, getSelectedModeLabel());
+        summaryCompleted.textContent = summary.completedLabel;
+        summaryAccuracy.textContent = summary.accuracyLabel;
+        summaryBestStreak.textContent = summary.streakLabel;
+        summaryEncouragement.textContent = summary.encouragement;
+      }
+
+      function renderPrimaryAction() {
+        primaryActionButton.textContent = getPrimaryActionLabel();
+        primaryActionButton.disabled =
+          primaryActionPending ||
+          questionState === QUESTION_STATES.PREPARING ||
+          questionState === QUESTION_STATES.LISTENING ||
+          questionState === QUESTION_STATES.CHECKING ||
+          (questionState === QUESTION_STATES.ANSWERING &&
+            (isMultipleChoiceMode(answerModeSelect.value) || !getCanSubmitCurrentAnswer()));
+
+        replayButton.disabled =
+          !currentSample ||
+          questionState === QUESTION_STATES.PREPARING ||
+          questionState === QUESTION_STATES.LISTENING ||
+          questionState === QUESTION_STATES.CHECKING;
+      }
+
+      function renderApp() {
+        renderSpeakingRateOutput();
+        renderControlState();
+        renderSessionStats();
+        renderRoundCard();
+        renderAnswerReveal();
+        renderAnswerPanel();
+        renderFeedbackPanel();
+        renderSummaryPanel();
+        renderPrimaryAction();
+      }
+
+      function notifyMilestones(milestones) {
+        const streakHit = milestones.streak.at(0);
+        const progressHit = milestones.progress.at(0);
+
+        if (streakHit) {
+          showToast(getStreakMilestoneMessage(streakHit), "success");
+          pulse(document.querySelector("#streakValue"));
+        }
+
+        if (progressHit) {
+          showToast(getProgressMilestoneMessage(progressHit), "neutral");
+        }
+
+        if (streakHit || progressHit) {
+          void uiAudioController.playFeedback("milestone");
+        }
+      }
+
+      async function playCurrentSample() {
+        if (!currentSample) {
+          return;
+        }
+
+        clearTransientFeedback();
+        questionState = QUESTION_STATES.LISTENING;
+        renderApp();
+
+        try {
+          const audioUrl = await fetchTtsAudioUrl(currentSample.spokenPhrase, getPlaybackOptions());
+          audioPlayer.pause();
+          audioPlayer.src = audioUrl;
+          audioPlayer.currentTime = 0;
+          await audioPlayer.play();
+        } catch (error) {
+          questionState = currentResolution
+            ? isSessionComplete(sessionState)
+              ? QUESTION_STATES.SESSION_COMPLETE
+              : QUESTION_STATES.RESOLVED
+            : QUESTION_STATES.ANSWERING;
+          setTransientFeedback(
+            "Audio issue",
+            error instanceof Error ? error.message : "Audio playback failed.",
+            FEEDBACK_STATES.INCORRECT
+          );
+          renderApp();
+        }
+      }
+
+      async function startRound({ resetSession = false } = {}) {
+        if (resetSession) {
+          sessionState = createPracticeSession({ targetCount: 10 });
+        }
+
+        clearTransientFeedback();
+        answerRevealed = false;
+        currentResolution = null;
+        selectedChoiceValue = "";
+        answerInput.value = "";
+        audioPlayer.pause();
+        audioPlayer.currentTime = 0;
+        questionState = QUESTION_STATES.PREPARING;
+        renderApp();
+
+        try {
+          const generationOptions = getGenerationOptions();
+          currentSample = buildCallsignSample(generationOptions);
+          currentChoices = buildAnswerChoices(currentSample, {
+            count: 4,
+            customLetters: normalizeCustomLetterSet(generationOptions.customLetters)
+          });
+
+          renderApp();
+          slideIn(roundCard);
+          await uiAudioController.unlock();
+          await playCurrentSample();
+        } catch (error) {
+          questionState = QUESTION_STATES.IDLE;
+          currentSample = null;
+          currentChoices = [];
+          setTransientFeedback(
+            "Could not prepare the callsign",
+            error instanceof Error ? error.message : "Question generation failed.",
+            FEEDBACK_STATES.INCORRECT
+          );
+          renderApp();
+        }
+      }
+
+      async function submitCurrentAnswer() {
+        if (!currentSample) {
+          return;
+        }
+
+        if (!getCanSubmitCurrentAnswer()) {
+          setTransientFeedback(
+            "Answer first",
+            isMultipleChoiceMode(answerModeSelect.value)
+              ? "Choose one option before checking."
+              : "Type an answer before checking."
+          );
+          renderApp();
+          return;
+        }
+
+        clearTransientFeedback();
+        questionState = QUESTION_STATES.CHECKING;
+        renderApp();
+        await uiAudioController.play("submit");
+        await wait(140);
+
+        currentResolution = resolveRoundAnswer(currentSample, {
+          answerMode: answerModeSelect.value,
+          typedAnswer: answerInput.value,
+          selectedChoice: selectedChoiceValue
+        });
+
+        const result = applyAnswerResult(sessionState, currentResolution.isCorrect);
+        sessionState = result.session;
+        questionState = isSessionComplete(sessionState)
+          ? QUESTION_STATES.SESSION_COMPLETE
+          : QUESTION_STATES.RESOLVED;
+
+        renderApp();
+
+        if (currentResolution.isCorrect) {
+          pop(feedbackPanel);
+          pulse(document.querySelector("#progressValue"));
+          await uiAudioController.playFeedback("correct");
+        } else {
+          shake(answerPanel);
+          shake(feedbackPanel);
+          await uiAudioController.playFeedback("incorrect");
+        }
+
+        notifyMilestones(result.milestones);
+
+        if (questionState === QUESTION_STATES.SESSION_COMPLETE) {
+          slideIn(sessionSummaryPanel);
+        }
+
+        primaryActionButton.focus();
+      }
+
+      async function handlePrimaryAction() {
+        if (primaryActionPending) {
+          return;
+        }
+
+        primaryActionPending = true;
+        renderPrimaryAction();
+
+        try {
+          await uiAudioController.unlock();
+
+          if (questionState === QUESTION_STATES.IDLE) {
+            await startRound({ resetSession: true });
+            return;
+          }
+
+          if (questionState === QUESTION_STATES.ANSWERING) {
+            await submitCurrentAnswer();
+            return;
+          }
+
+          if (questionState === QUESTION_STATES.RESOLVED) {
+            await startRound();
+            return;
+          }
+
+          if (questionState === QUESTION_STATES.SESSION_COMPLETE) {
+            await startRound({ resetSession: true });
+          }
+        } finally {
+          primaryActionPending = false;
+          renderPrimaryAction();
+        }
+      }
+
+      practiceModeSelect.addEventListener("change", () => {
+        clearTransientFeedback();
+        renderApp();
+      });
+
+      answerModeSelect.addEventListener("change", () => {
+        clearTransientFeedback();
+        selectedChoiceValue = "";
+        renderApp();
+      });
+
+      accentSelect.addEventListener("change", () => {
+        renderApp();
+      });
+
+      customLettersInput.addEventListener("input", () => {
+        customLettersInput.value = cleanCustomLettersInput(customLettersInput.value);
+        renderApp();
+      });
+
+      letterLengthInput.addEventListener("change", () => {
+        const value = Number(letterLengthInput.value) || 4;
+        letterLengthInput.value = String(Math.min(8, Math.max(2, value)));
+        renderApp();
+      });
+
+      speakingRateInput.addEventListener("input", () => {
+        renderApp();
+      });
+
+      radioToneCheckbox.addEventListener("change", () => {
+        renderApp();
+      });
+
+      soundCheckbox.addEventListener("change", () => {
+        uiAudioController.setSoundEnabled(soundCheckbox.checked);
+        renderApp();
+      });
+
+      vibrationCheckbox.addEventListener("change", () => {
+        uiAudioController.setVibrationEnabled(vibrationCheckbox.checked);
+        renderApp();
+      });
+
+      primaryActionButton.addEventListener("click", () => {
+        void handlePrimaryAction();
+      });
+
+      replayButton.addEventListener("click", () => {
+        void playCurrentSample();
+      });
+
+      revealButton.addEventListener("click", () => {
+        answerRevealed = !answerRevealed;
+        renderAnswerReveal();
+      });
+
+      answerInput.addEventListener("input", () => {
+        clearTransientFeedback();
+        answerInput.value = cleanTypedAnswer(answerInput.value);
+        renderPrimaryAction();
+        renderFeedbackPanel();
+        answerModeShell.dataset.ready = String(getCanSubmitCurrentAnswer());
+      });
+
+      answerInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+
+          if (questionState === QUESTION_STATES.ANSWERING) {
+            void submitCurrentAnswer();
+          }
+        }
+      });
+
+      audioPlayer.addEventListener("ended", () => {
+        if (!currentSample) {
+          return;
+        }
+
+        questionState = currentResolution
+          ? isSessionComplete(sessionState)
+            ? QUESTION_STATES.SESSION_COMPLETE
+            : QUESTION_STATES.RESOLVED
+          : QUESTION_STATES.ANSWERING;
+        renderApp();
+        focusAnswerArea();
+      });
+
+      window.addEventListener("beforeunload", () => {
+        clearTtsAudioCache();
+        resetUiAudioContext();
+      });
+
+      renderApp();
+    </script>
+  </body>
+</html>
