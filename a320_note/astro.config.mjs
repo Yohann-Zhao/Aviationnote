@@ -74,6 +74,18 @@ export default defineConfig({
 					items: [
 						{ label: 'Air Conditioning System', translations: { 'zh-CN': '空调系统' }, badge: { text: 'In Progress', variant: 'caution' }, link: '/air_conditioning/air_conditioning_system' },
 						{ label: 'Air Conditioning Operation', translations: { 'zh-CN': '空调操作' }, badge: { text: 'In Progress', variant: 'caution' }, link: '/air_conditioning/air_conditioning_operation' },
+						{ label: 'Air Conditioning Failure Cases', translations: { 'zh-CN': '空调故障案例' }, badge: { text: 'In Progress', variant: 'caution' }, link: '/air_conditioning/air_conditioning_failure_cases' },
+						{ label: 'Air Conditioning Cargo System Presentation', translations: { 'zh-CN': '空调货舱系统介绍' }, badge: { text: 'In Progress', variant: 'caution' }, link: '/air_conditioning/air_conditioning_cargo_system_presentation' },
+					],
+				},
+				{
+					label: 'Pressurization & Ventilation',
+					translations: {
+						'zh-CN': '增压与通风',//这里要大写CN
+					},
+					items: [
+						{ label: 'Pressurization System', translations: { 'zh-CN': '增压系统' }, badge: { text: 'In Progress', variant: 'caution' }, link: '/pressurization/pressurization_system' },
+						{ label: 'Ventilation System', translations: { 'zh-CN': '通风系统' }, badge: { text: 'In Progress', variant: 'caution' }, link: '/ventilation/ventilation_system' },
 					],
 				},
 			],
