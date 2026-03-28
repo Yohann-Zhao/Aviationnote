@@ -30,23 +30,9 @@ const defaultSpeakingRate = 1.2;
     <main class="practice-app">
       <section class="panel hero">
         <div>
-          <p class="eyebrow">Flight Deck Training</p>
           <h1>{pageTitle}</h1>
-          <p class="hero-copy">
-            Listen first, answer fast, and keep the rhythm through a 10-callsign round. The page now
-            centers the transmission, the answer moment, and the feedback loop instead of feeling like a
-            settings form with audio controls.
-          </p>
+          <p class="hero-copy">Hear the callsign. Copy it. Keep the streak through 10 rounds.</p>
         </div>
-
-        <aside class="hero-note" aria-label="Quick onboarding">
-          <p class="eyebrow">Quick Start</p>
-          <h3>Listen. Answer. Continue.</h3>
-          <p class="supporting-text">
-            Recommended setup: General Aviation, typed answers, mixed English, 1.20x, radio tone on.
-          </p>
-          <p class="supporting-text">One round is 10 callsigns with live streak and accuracy tracking.</p>
-        </aside>
       </section>
 
       <section class="panel session-bar" aria-label="Session status">
@@ -71,12 +57,8 @@ const defaultSpeakingRate = 1.2;
       <div class="practice-grid">
         <aside class="panel settings-panel">
           <div class="settings-header">
-            <p class="eyebrow">Practice Setup</p>
-            <h2>Quick controls</h2>
-            <p class="settings-copy">
-              Keep the main path simple. The essential choices stay visible here, and the extra tuning
-              lives in advanced settings.
-            </p>
+            <p class="eyebrow">Setup</p>
+            <h2>Practice</h2>
           </div>
 
           <div class="settings-grid">
@@ -155,13 +137,10 @@ const defaultSpeakingRate = 1.2;
             </div>
           </details>
 
-          <p id="controlHint" class="helper-text">
-            General Aviation and Custom Letters use the custom letter pool when letters are generated.
-          </p>
         </aside>
 
         <section class="practice-main">
-          <section id="roundCard" class="panel round-card" data-question-state="idle">
+          <section id="roundCard" class="panel round-card" data-question-state="idle" data-tone="neutral">
             <div class="round-header">
               <div class="chip-row">
                 <span class="chip">Current mode <strong id="modeChipValue">General Aviation</strong></span>
@@ -189,11 +168,7 @@ const defaultSpeakingRate = 1.2;
               <div class="signal-copy">
                 <p id="statusEyebrow" class="eyebrow">Ready</p>
                 <h2 id="instructionOutput">Ready for your first callsign?</h2>
-                <p id="statusOutput" class="status-copy">
-                  Start the round to hear the first transmission. Replay stays available after each
-                  playback, and the answer stays hidden unless you reveal it.
-                </p>
-                <div id="transmissionMeta" class="transmission-meta"></div>
+                <p id="statusOutput" class="status-copy">Start when you are ready.</p>
               </div>
             </div>
 
@@ -206,7 +181,9 @@ const defaultSpeakingRate = 1.2;
             <div id="answerRevealBox" class="answer-reveal" hidden>
               <span class="answer-reveal-label">Answer</span>
               <strong id="answerOutput" class="answer-reveal-value">Hidden</strong>
-              <p id="phraseOutput" class="supporting-text">Spoken phrase stays hidden during practice.</p>
+              <p id="answerMeta" class="supporting-text"></p>
+              <p id="phraseOutput" class="supporting-text">Pronunciation stays hidden during practice.</p>
+              <p id="submittedOutput" class="supporting-text" hidden></p>
             </div>
           </section>
 
@@ -238,27 +215,6 @@ const defaultSpeakingRate = 1.2;
                 <div id="choiceButtons" class="choice-grid" role="listbox" aria-label="Answer choices"></div>
               </div>
             </div>
-          </section>
-
-          <section
-            id="feedbackPanel"
-            class="panel feedback-panel"
-            data-feedback-tone="neutral"
-            data-feedback-state="idle"
-            aria-live="polite"
-          >
-            <p id="feedbackEyebrow" class="eyebrow">Ready</p>
-            <h2 id="feedbackHeadline" class="feedback-headline">Ready for your first callsign?</h2>
-            <p id="feedbackDetail" class="feedback-detail">
-              Listen to the transmission, answer it, and use the next prompt to keep the rhythm moving.
-            </p>
-            <div id="feedbackAnswerCard" class="answer-reveal feedback-answer-card" hidden>
-              <span id="feedbackAnswerLabel" class="answer-reveal-label">Full callsign</span>
-              <strong id="feedbackAnswerValue" class="answer-reveal-value">CA1234</strong>
-              <p id="feedbackAnswerMeta" class="supporting-text">Expected answer: 1234</p>
-              <p id="feedbackPhraseDetail" class="supporting-text">Pronunciation: Air China twelve thirty four</p>
-            </div>
-            <p id="feedbackSupport" class="feedback-support">One round is 10 callsigns.</p>
           </section>
 
           <section id="sessionSummaryPanel" class="panel summary-panel" hidden>
@@ -312,13 +268,7 @@ const defaultSpeakingRate = 1.2;
         isMultipleChoiceMode,
         resolveRoundAnswer
       } from "../lib/answer-flow.js";
-      import {
-        buildFeedbackViewModel,
-        buildSessionCompleteViewModel,
-        FEEDBACK_STATES,
-        getProgressMilestoneMessage,
-        getStreakMilestoneMessage
-      } from "../lib/ui-feedback.js";
+      import { getProgressMilestoneMessage, getStreakMilestoneMessage } from "../lib/ui-feedback.js";
       import { fadeOut, pop, pulse, shake, slideIn } from "../lib/ui-animations.js";
       import {
         createUiAudioController,
@@ -337,7 +287,6 @@ const defaultSpeakingRate = 1.2;
       const radioToneCheckbox = document.querySelector("#radioToneCheckbox");
       const soundCheckbox = document.querySelector("#soundCheckbox");
       const vibrationCheckbox = document.querySelector("#vibrationCheckbox");
-      const controlHint = document.querySelector("#controlHint");
       const sessionModeValue = document.querySelector("#sessionModeValue");
       const progressValue = document.querySelector("#progressValue");
       const streakValue = document.querySelector("#streakValue");
@@ -349,13 +298,14 @@ const defaultSpeakingRate = 1.2;
       const statusEyebrow = document.querySelector("#statusEyebrow");
       const instructionOutput = document.querySelector("#instructionOutput");
       const statusOutput = document.querySelector("#statusOutput");
-      const transmissionMeta = document.querySelector("#transmissionMeta");
       const primaryActionButton = document.querySelector("#primaryActionButton");
       const replayButton = document.querySelector("#replayButton");
       const revealButton = document.querySelector("#revealButton");
       const answerRevealBox = document.querySelector("#answerRevealBox");
       const answerOutput = document.querySelector("#answerOutput");
+      const answerMeta = document.querySelector("#answerMeta");
       const phraseOutput = document.querySelector("#phraseOutput");
+      const submittedOutput = document.querySelector("#submittedOutput");
       const answerPanel = document.querySelector("#answerPanel");
       const answerHeading = document.querySelector("#answerHeading");
       const answerGuidance = document.querySelector("#answerGuidance");
@@ -364,16 +314,6 @@ const defaultSpeakingRate = 1.2;
       const typedSection = document.querySelector("#typedSection");
       const choiceSection = document.querySelector("#choiceSection");
       const choiceButtons = document.querySelector("#choiceButtons");
-      const feedbackPanel = document.querySelector("#feedbackPanel");
-      const feedbackEyebrow = document.querySelector("#feedbackEyebrow");
-      const feedbackHeadline = document.querySelector("#feedbackHeadline");
-      const feedbackDetail = document.querySelector("#feedbackDetail");
-      const feedbackAnswerCard = document.querySelector("#feedbackAnswerCard");
-      const feedbackAnswerLabel = document.querySelector("#feedbackAnswerLabel");
-      const feedbackAnswerValue = document.querySelector("#feedbackAnswerValue");
-      const feedbackAnswerMeta = document.querySelector("#feedbackAnswerMeta");
-      const feedbackPhraseDetail = document.querySelector("#feedbackPhraseDetail");
-      const feedbackSupport = document.querySelector("#feedbackSupport");
       const sessionSummaryPanel = document.querySelector("#sessionSummaryPanel");
       const summaryCompleted = document.querySelector("#summaryCompleted");
       const summaryAccuracy = document.querySelector("#summaryAccuracy");
@@ -491,152 +431,66 @@ const defaultSpeakingRate = 1.2;
         return isMultipleChoiceMode(answerModeSelect.value) ? "Choose an option" : "Check";
       }
 
+      function getRoundCardTone() {
+        if (transientFeedback?.tone) return transientFeedback.tone;
+        if (questionState === QUESTION_STATES.SESSION_COMPLETE) return "complete";
+        if (currentResolution) return currentResolution.isCorrect ? "success" : "error";
+        if (questionState === QUESTION_STATES.CHECKING) return "warning";
+        if (questionState === QUESTION_STATES.LISTENING) return "listening";
+        return "neutral";
+      }
+
       function getStatusEyebrowText() {
+        if (transientFeedback?.eyebrow) return transientFeedback.eyebrow;
         if (questionState === QUESTION_STATES.PREPARING) return "Preparing transmission";
         if (questionState === QUESTION_STATES.LISTENING) return "Listening";
         if (questionState === QUESTION_STATES.CHECKING) return "Checking";
-        if (questionState === QUESTION_STATES.SESSION_COMPLETE) return "Round complete";
+        if (questionState === QUESTION_STATES.SESSION_COMPLETE) return "Session complete";
         if (currentResolution) return currentResolution.isCorrect ? "Correct" : "Not quite";
         if (currentSample) return "Your turn";
         return "Ready";
       }
 
       function getInstructionHeading() {
-        if (questionState === QUESTION_STATES.SESSION_COMPLETE) return "Round complete.";
+        if (transientFeedback?.headline) return transientFeedback.headline;
+        if (questionState === QUESTION_STATES.SESSION_COMPLETE) return "Session complete.";
         if (currentResolution) return currentResolution.isCorrect ? "Transmission copied." : "Review the answer and continue.";
         if (currentSample) return currentSample.instruction;
         return "Ready for your first callsign?";
       }
 
       function getRoundStatusCopy() {
+        if (transientFeedback?.detail) {
+          return transientFeedback.detail;
+        }
+
         if (questionState === QUESTION_STATES.PREPARING) {
-          return "Building the next callsign and tuning the voice channel.";
+          return "Preparing the next callsign.";
         }
 
         if (questionState === QUESTION_STATES.LISTENING) {
-          return `Stay on the transmission. ${getPlaybackLabel()}.`;
+          return "Listen to the transmission.";
         }
 
         if (questionState === QUESTION_STATES.CHECKING) {
-          return "Short pause while the round resolves.";
+          return "Checking your answer.";
         }
 
         if (questionState === QUESTION_STATES.SESSION_COMPLETE) {
-          return "Your 10-callsign round is complete. Review the summary below or launch another round right away.";
+          return `${sessionState.completedCount} complete. Accuracy ${sessionState.accuracy}%. Best streak ${sessionState.bestStreak}.`;
         }
 
         if (currentResolution) {
           return currentResolution.isCorrect
-            ? "Good copy. The full answer is shown below before you move on."
-            : "The full answer is shown below. Replay once if you want one more listen before the next callsign.";
+            ? "Correct. Review below, then continue."
+            : "Review the answer below, then continue.";
         }
 
         if (currentSample) {
-          return "Answer as soon as the transmission ends. Replay stays available whenever you need another pass.";
+          return "Answer after playback ends.";
         }
 
-        return "Start the round to hear the first transmission. Replay stays available after each playback, and the answer stays hidden unless you reveal it.";
-      }
-
-      function getTransmissionMetaItems() {
-        const items = [];
-        items.push(`Answer mode: ${answerModeSelect.value === "typed" ? "Type" : "4 choices"}`);
-        items.push(getPlaybackLabel());
-
-        if (currentSample) {
-          items.push(currentSample.label);
-        }
-
-        return items;
-      }
-
-      function getFeedbackModel() {
-        if (transientFeedback) {
-          return transientFeedback;
-        }
-
-        if (questionState === QUESTION_STATES.SESSION_COMPLETE) {
-          return buildSessionCompleteViewModel({
-            completedCount: sessionState.completedCount,
-            accuracy: sessionState.accuracy,
-            bestStreak: sessionState.bestStreak,
-            detail: buildSessionSummary(sessionState, getSelectedModeLabel()).encouragement
-          });
-        }
-
-        if (currentResolution) {
-          const submittedValue = currentResolution.submittedValue?.trim();
-
-          return buildFeedbackViewModel({
-            state: currentResolution.isCorrect ? FEEDBACK_STATES.CORRECT : FEEDBACK_STATES.INCORRECT,
-            correctAnswer: currentSample?.answer,
-            detail: currentResolution.isCorrect
-              ? "Copied correctly."
-              : submittedValue
-                ? `Your answer: ${submittedValue}`
-                : "Compare your answer with the card below."
-          });
-        }
-
-        if (questionState === QUESTION_STATES.PREPARING) {
-          return buildFeedbackViewModel({
-            state: FEEDBACK_STATES.PREPARING,
-            detail: "Tuning voice channel..."
-          });
-        }
-
-        if (questionState === QUESTION_STATES.LISTENING) {
-          return buildFeedbackViewModel({
-            state: FEEDBACK_STATES.LISTENING,
-            detail: "Listen first, then answer."
-          });
-        }
-
-        if (questionState === QUESTION_STATES.CHECKING) {
-          return buildFeedbackViewModel({
-            state: FEEDBACK_STATES.CHECKING
-          });
-        }
-
-        if (currentSample) {
-          return buildFeedbackViewModel({
-            state: FEEDBACK_STATES.IDLE,
-            headline: "Your turn",
-            detail: isMultipleChoiceMode(answerModeSelect.value)
-              ? selectedChoiceValue
-                ? "Selection locked. Checking your answer..."
-                : "Choose the closest match. It will check automatically."
-              : getCanSubmitCurrentAnswer()
-                ? "Input ready. Press Check or Enter."
-                : "Type the answer you heard, then press Check."
-          });
-        }
-
-        return buildFeedbackViewModel({
-          state: FEEDBACK_STATES.IDLE,
-          headline: "Ready for your first callsign?",
-          detail: "Listen to the transmission, answer it, and use the next prompt to keep the rhythm moving."
-        });
-      }
-
-      function getFeedbackSupportCopy() {
-        if (questionState === QUESTION_STATES.SESSION_COMPLETE) {
-          return "Use Start Another Round for a fresh 10-callsign session.";
-        }
-
-        if (currentResolution) {
-          return currentResolution.isCorrect
-            ? "Keep the rhythm moving with Next Callsign."
-            : "One miss does not hurt the round. Keep going.";
-        }
-
-        if (currentSample) {
-          return sessionState.currentStreak > 0
-            ? `${sessionState.currentStreak} in a row. Keep it going.`
-            : "One round is 10 callsigns.";
-        }
-
-        return "One round is 10 callsigns.";
+        return "Start when you are ready.";
       }
 
       function getAnswerHeading() {
@@ -654,23 +508,23 @@ const defaultSpeakingRate = 1.2;
 
         if (!currentSample) {
           return isMultipleChoiceMode(answerModeSelect.value)
-            ? "Start the round, then select one answer to check automatically."
-            : "Start the round, then type the answer and press Enter or Check.";
+            ? "Select an answer after playback."
+            : "Type the answer after playback.";
         }
 
         if (currentResolution) {
           return currentResolution.isCorrect
-            ? "Correct answer locked in. Move on when you are ready."
-            : "Replay once if you want another listen before moving on.";
+            ? "Move on when you are ready."
+            : "Replay if needed, then continue.";
         }
 
         return isMultipleChoiceMode(answerModeSelect.value)
           ? selectedChoiceValue
-            ? "Selection received. Checking automatically."
-            : "Pick one option to check it immediately."
+            ? "Checking..."
+            : "Pick one option."
           : getCanSubmitCurrentAnswer()
-            ? "Input ready. Press Enter or Check."
-            : "Type the answer, then press Check.";
+            ? "Press Enter or Check."
+            : "Type the answer.";
       }
 
       function getAnswerStateAttribute() {
@@ -727,12 +581,13 @@ const defaultSpeakingRate = 1.2;
         transientFeedback = null;
       }
 
-      function setTransientFeedback(headline, detail, tone = FEEDBACK_STATES.IDLE) {
-        transientFeedback = buildFeedbackViewModel({
-          state: tone,
+      function setTransientFeedback(headline, detail, tone = "neutral", eyebrow = headline) {
+        transientFeedback = {
+          tone,
+          eyebrow,
           headline,
           detail
-        });
+        };
       }
 
       function renderSpeakingRateOutput() {
@@ -744,7 +599,6 @@ const defaultSpeakingRate = 1.2;
         const mode = practiceModeSelect.value;
         const usesCustomLetters = mode === "generalAviation" || mode === "letters";
         const usesLetterLength = mode === "letters";
-        const playbackOptions = getPlaybackOptions();
         const soundSupported = supportsUiAudio();
         const vibrationSupported = supportsUiVibration();
 
@@ -752,55 +606,47 @@ const defaultSpeakingRate = 1.2;
         letterLengthInput.disabled = !usesLetterLength;
         soundCheckbox.disabled = !soundSupported;
         vibrationCheckbox.disabled = !vibrationSupported;
-
-        if (mode === "transport") {
-          controlHint.textContent = "Transport mode reads the airline name out loud, but the expected answer is only the flight number.";
-        } else if (mode === "generalAviation") {
-          controlHint.textContent = "General Aviation uses aircraft type plus a 3-character suffix. The custom letter pool affects the letter characters.";
-        } else if (mode === "numeric") {
-          controlHint.textContent = "Numeric mode generates a 4-digit callsign pronounced in grouped aviation style.";
-        } else {
-          controlHint.textContent = "Custom Letters uses the custom letter pool and the length control for pure letter dictation.";
-        }
-
-        controlHint.textContent += ` Current speech rate: ${playbackOptions.speakingRate.toFixed(2)}x.${playbackOptions.radioTone ? " Radio post-processing is enabled." : " Radio post-processing is disabled."}`;
-
-        if (!soundSupported) {
-          controlHint.textContent += " UI sound is unavailable in this browser.";
-        }
-
-        if (!vibrationSupported) {
-          controlHint.textContent += " Vibration is unavailable on this device.";
-        }
-      }
-
-      function renderTransmissionMeta() {
-        transmissionMeta.innerHTML = "";
-
-        for (const item of getTransmissionMetaItems()) {
-          const badge = document.createElement("span");
-          badge.className = "chip";
-          badge.textContent = item;
-          transmissionMeta.append(badge);
-        }
       }
 
       function renderAnswerReveal() {
         const canRevealBeforeAnswer = Boolean(currentSample) && !currentResolution;
+        const shouldShowDetailCard = Boolean(currentSample) && (answerRevealed || Boolean(currentResolution));
+        const hasDistinctExpectedAnswer =
+          String(currentSample?.answer ?? "").trim() !== String(currentSample?.callsign ?? "").trim();
 
         revealButton.hidden = !canRevealBeforeAnswer;
         revealButton.disabled = !canRevealBeforeAnswer;
         revealButton.textContent = answerRevealed ? "Hide Answer" : "Show Answer";
-        answerRevealBox.hidden = !canRevealBeforeAnswer || !answerRevealed;
+        answerRevealBox.hidden = !shouldShowDetailCard;
+        answerRevealBox.dataset.cardTone = currentResolution
+          ? currentResolution.isCorrect
+            ? "success"
+            : "error"
+          : "neutral";
 
         if (!currentSample) {
           answerOutput.textContent = "Hidden";
-          phraseOutput.textContent = "Spoken phrase stays hidden during practice.";
+          answerMeta.textContent = "";
+          phraseOutput.textContent = "Pronunciation stays hidden during practice.";
+          submittedOutput.hidden = true;
+          submittedOutput.textContent = "";
           return;
         }
 
-        answerOutput.textContent = currentSample.revealAnswer;
-        phraseOutput.textContent = `Spoken phrase: ${currentSample.spokenPhrase}`;
+        answerRevealBox.querySelector(".answer-reveal-label").textContent = currentResolution
+          ? currentResolution.isCorrect
+            ? "Confirmed"
+            : "Correct answer"
+          : "Answer";
+        answerOutput.textContent = currentSample.callsign;
+        answerMeta.textContent = hasDistinctExpectedAnswer
+          ? `Expected answer: ${currentSample.answer}`
+          : currentSample.instruction;
+        phraseOutput.textContent = `Pronunciation: ${currentSample.spokenPhrase}`;
+
+        const submittedValue = currentResolution?.submittedValue?.trim() ?? "";
+        submittedOutput.hidden = !currentResolution || currentResolution.isCorrect || !submittedValue;
+        submittedOutput.textContent = submittedOutput.hidden ? "" : `Your answer: ${submittedValue}`;
       }
 
       function renderChoices() {
@@ -850,13 +696,13 @@ const defaultSpeakingRate = 1.2;
 
       function renderRoundCard() {
         roundCard.dataset.questionState = questionState;
+        roundCard.dataset.tone = getRoundCardTone();
         modeChipValue.textContent = currentSample?.label ?? getSelectedModeLabel();
         roundChipValue.textContent = `${Math.min(sessionState.completedCount + 1, sessionState.targetCount)} / ${sessionState.targetCount}`;
         voiceChipValue.textContent = getPlaybackLabel();
         statusEyebrow.textContent = getStatusEyebrowText();
         instructionOutput.textContent = getInstructionHeading();
         statusOutput.textContent = getRoundStatusCopy();
-        renderTransmissionMeta();
       }
 
       function renderAnswerPanel() {
@@ -876,40 +722,6 @@ const defaultSpeakingRate = 1.2;
         answerInput.dataset.answerState = getAnswerStateAttribute();
 
         renderChoices();
-      }
-
-      function renderFeedbackPanel() {
-        const feedbackModel = getFeedbackModel();
-        feedbackPanel.dataset.feedbackTone = feedbackModel.tone;
-        feedbackPanel.dataset.feedbackState = feedbackModel.state;
-        feedbackEyebrow.textContent = feedbackModel.headline;
-        feedbackHeadline.textContent = feedbackModel.headline;
-        feedbackDetail.textContent = feedbackModel.detail;
-        renderFeedbackAnswerCard();
-        feedbackSupport.textContent = getFeedbackSupportCopy();
-      }
-
-      function renderFeedbackAnswerCard() {
-        const shouldShowFeedbackAnswer = Boolean(currentSample && currentResolution);
-        feedbackAnswerCard.hidden = !shouldShowFeedbackAnswer;
-
-        if (!shouldShowFeedbackAnswer) {
-          feedbackAnswerLabel.textContent = "Full callsign";
-          feedbackAnswerValue.textContent = "Hidden";
-          feedbackAnswerMeta.textContent = "";
-          feedbackPhraseDetail.textContent = "";
-          return;
-        }
-
-        const hasDistinctExpectedAnswer =
-          String(currentSample.answer ?? "").trim() !== String(currentSample.callsign ?? "").trim();
-
-        feedbackAnswerLabel.textContent = "Full callsign";
-        feedbackAnswerValue.textContent = currentSample.callsign;
-        feedbackAnswerMeta.textContent = hasDistinctExpectedAnswer
-          ? `Expected answer: ${currentSample.answer}`
-          : currentSample.instruction;
-        feedbackPhraseDetail.textContent = `Pronunciation: ${currentSample.spokenPhrase}`;
       }
 
       function renderSummaryPanel() {
@@ -951,7 +763,6 @@ const defaultSpeakingRate = 1.2;
         renderRoundCard();
         renderAnswerReveal();
         renderAnswerPanel();
-        renderFeedbackPanel();
         renderSummaryPanel();
         renderPrimaryAction();
       }
@@ -998,7 +809,7 @@ const defaultSpeakingRate = 1.2;
           setTransientFeedback(
             "Audio issue",
             error instanceof Error ? error.message : "Audio playback failed.",
-            FEEDBACK_STATES.INCORRECT
+            "error"
           );
           renderApp();
         }
@@ -1038,7 +849,7 @@ const defaultSpeakingRate = 1.2;
           setTransientFeedback(
             "Could not prepare the callsign",
             error instanceof Error ? error.message : "Question generation failed.",
-            FEEDBACK_STATES.INCORRECT
+            "error"
           );
           renderApp();
         }
@@ -1054,7 +865,8 @@ const defaultSpeakingRate = 1.2;
             "Answer first",
             isMultipleChoiceMode(answerModeSelect.value)
               ? "Choose one option before checking."
-              : "Type an answer before checking."
+              : "Type an answer before checking.",
+            "warning"
           );
           renderApp();
           return;
@@ -1081,12 +893,12 @@ const defaultSpeakingRate = 1.2;
         renderApp();
 
         if (currentResolution.isCorrect) {
-          pop(feedbackPanel);
+          pop(roundCard);
           pulse(document.querySelector("#progressValue"));
           await uiAudioController.playFeedback("correct");
         } else {
           shake(answerPanel);
-          shake(feedbackPanel);
+          shake(roundCard);
           await uiAudioController.playFeedback("incorrect");
         }
 

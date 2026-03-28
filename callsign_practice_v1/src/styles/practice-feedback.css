@@ -1,60 +1,102 @@
-.feedback-panel {
-  display: grid;
-  gap: 14px;
-  align-items: start;
+.round-card[data-tone="neutral"] {
+  border-color: rgba(123, 197, 255, 0.2);
 }
 
-.feedback-panel[data-feedback-tone="neutral"] {
-  border-color: rgba(123, 197, 255, 0.22);
+.round-card[data-tone="listening"] {
+  border-color: rgba(123, 197, 255, 0.34);
+  background:
+    linear-gradient(160deg, rgba(123, 197, 255, 0.1), transparent 54%),
+    linear-gradient(180deg, rgba(19, 31, 51, 0.96), rgba(10, 17, 28, 0.92));
 }
 
-.feedback-panel[data-feedback-tone="success"] {
-  border-color: rgba(104, 224, 164, 0.3);
+.round-card[data-tone="warning"] {
+  border-color: rgba(255, 211, 106, 0.3);
+  background:
+    linear-gradient(160deg, rgba(255, 211, 106, 0.08), transparent 54%),
+    linear-gradient(180deg, rgba(19, 31, 51, 0.96), rgba(10, 17, 28, 0.92));
+}
+
+.round-card[data-tone="success"] {
+  border-color: rgba(104, 224, 164, 0.34);
   background:
     linear-gradient(160deg, rgba(104, 224, 164, 0.12), transparent 52%),
     linear-gradient(180deg, rgba(19, 31, 51, 0.96), rgba(10, 17, 28, 0.92));
 }
 
-.feedback-panel[data-feedback-tone="error"] {
-  border-color: rgba(255, 143, 135, 0.3);
+.round-card[data-tone="error"] {
+  border-color: rgba(255, 143, 135, 0.34);
   background:
     linear-gradient(160deg, rgba(255, 143, 135, 0.12), transparent 52%),
     linear-gradient(180deg, rgba(19, 31, 51, 0.96), rgba(10, 17, 28, 0.92));
 }
 
-.feedback-panel[data-feedback-tone="positive"] {
-  border-color: rgba(255, 211, 106, 0.28);
-}
-
-.feedback-headline {
-  font-size: clamp(1.35rem, 2.4vw, 1.8rem);
-}
-
-.feedback-detail {
-  color: var(--text-muted);
-  line-height: 1.65;
-}
-
-.feedback-answer-card {
-  margin-top: 0;
-  border-style: solid;
-  border-color: rgba(255, 255, 255, 0.1);
+.round-card[data-tone="complete"] {
+  border-color: rgba(255, 181, 77, 0.34);
   background:
-    linear-gradient(160deg, rgba(255, 255, 255, 0.04), transparent 58%),
+    linear-gradient(160deg, rgba(255, 181, 77, 0.12), transparent 52%),
+    linear-gradient(180deg, rgba(19, 31, 51, 0.96), rgba(10, 17, 28, 0.92));
+}
+
+.round-card[data-tone="success"] .signal-copy .eyebrow,
+.round-card[data-tone="success"] .answer-reveal-label {
+  color: var(--success);
+}
+
+.round-card[data-tone="error"] .signal-copy .eyebrow,
+.round-card[data-tone="error"] .answer-reveal-label {
+  color: var(--danger);
+}
+
+.round-card[data-tone="warning"] .signal-copy .eyebrow,
+.round-card[data-tone="complete"] .signal-copy .eyebrow,
+.round-card[data-tone="complete"] .answer-reveal-label {
+  color: var(--warning);
+}
+
+.round-card[data-tone="listening"] .signal-visual {
+  border-color: rgba(123, 197, 255, 0.28);
+}
+
+.round-card[data-tone="success"] .signal-visual {
+  border-color: rgba(104, 224, 164, 0.28);
+  background:
+    radial-gradient(circle at center, rgba(104, 224, 164, 0.14), transparent 44%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 100%);
+}
+
+.round-card[data-tone="error"] .signal-visual {
+  border-color: rgba(255, 143, 135, 0.28);
+  background:
+    radial-gradient(circle at center, rgba(255, 143, 135, 0.14), transparent 44%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 100%);
+}
+
+.round-card[data-tone="complete"] .signal-visual {
+  border-color: rgba(255, 181, 77, 0.28);
+  background:
+    radial-gradient(circle at center, rgba(255, 181, 77, 0.14), transparent 44%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 100%);
+}
+
+.answer-reveal[data-card-tone="success"] {
+  border-color: rgba(104, 224, 164, 0.32);
+  background:
+    linear-gradient(160deg, rgba(104, 224, 164, 0.12), transparent 58%),
     rgba(255, 255, 255, 0.03);
 }
 
-.feedback-answer-card .answer-reveal-value {
+.answer-reveal[data-card-tone="error"] {
+  border-color: rgba(255, 143, 135, 0.32);
+  background:
+    linear-gradient(160deg, rgba(255, 143, 135, 0.12), transparent 58%),
+    rgba(255, 255, 255, 0.03);
+}
+
+.answer-reveal-value {
   font-family: var(--font-mono);
   font-size: clamp(1.15rem, 2.2vw, 1.4rem);
   letter-spacing: 0.12em;
   text-transform: uppercase;
-}
-
-.feedback-support {
-  color: var(--text-soft);
-  font-size: 0.92rem;
-  line-height: 1.55;
 }
 
 .typed-answer[data-answer-state="correct"] {
@@ -77,24 +119,4 @@
 
 .answer-panel[data-answer-mode="typed"] .choice-shell {
   display: none;
-}
-
-.answer-panel[data-answer-mode="typed"] .answer-guidance::before {
-  content: "Typed mode";
-  display: inline-block;
-  margin-right: 10px;
-  color: var(--accent);
-  font-size: 0.74rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.answer-panel[data-answer-mode="multipleChoice"] .answer-guidance::before {
-  content: "4 choices";
-  display: inline-block;
-  margin-right: 10px;
-  color: var(--accent);
-  font-size: 0.74rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
 }

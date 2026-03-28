@@ -80,29 +80,19 @@ main.practice-app {
 }
 
 .hero {
+  padding: 24px 28px;
+}
+
+.hero > div {
   display: grid;
-  gap: 18px;
-  grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
-  padding: 28px;
+  gap: 10px;
+  max-width: 48rem;
 }
 
 .hero-copy {
-  max-width: 62ch;
-  margin: 14px 0 0;
+  max-width: 36ch;
   color: var(--text-muted);
-  line-height: 1.65;
-}
-
-.hero-note {
-  display: grid;
-  gap: 12px;
-  align-content: start;
-  padding: 20px;
-  border-radius: var(--radius-md);
-  background:
-    linear-gradient(160deg, rgba(255, 181, 77, 0.12), transparent 46%),
-    rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--line);
+  line-height: 1.5;
 }
 
 .eyebrow {
@@ -191,15 +181,10 @@ p {
   gap: 10px;
 }
 
-.settings-copy {
-  color: var(--text-muted);
-  line-height: 1.6;
-}
-
 .settings-grid {
   display: grid;
   gap: 14px;
-  margin-top: 18px;
+  margin-top: 12px;
 }
 
 label,
@@ -240,7 +225,6 @@ input[type="range"] {
 }
 
 .range-meta,
-.helper-text,
 .supporting-text {
   color: var(--text-muted);
   line-height: 1.55;
@@ -251,10 +235,6 @@ input[type="range"] {
   justify-content: space-between;
   gap: 12px;
   font-size: 0.85rem;
-}
-
-.helper-text {
-  font-size: 0.92rem;
 }
 
 .supporting-text {
@@ -412,7 +392,6 @@ summary:focus-visible {
 }
 
 @media (max-width: 960px) {
-  .hero,
   .practice-grid {
     grid-template-columns: 1fr;
   }

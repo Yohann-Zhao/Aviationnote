@@ -4,7 +4,6 @@
 
 .round-card,
 .answer-panel,
-.feedback-panel,
 .summary-panel {
   padding: 24px;
 }
@@ -160,19 +159,12 @@
 
 .signal-copy {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .status-copy {
   color: var(--text-muted);
-  line-height: 1.6;
-}
-
-.transmission-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 6px;
+  line-height: 1.5;
 }
 
 .round-controls {
@@ -193,6 +185,11 @@
   border: 1px dashed rgba(255, 255, 255, 0.14);
 }
 
+.answer-reveal[data-card-tone="success"],
+.answer-reveal[data-card-tone="error"] {
+  border-style: solid;
+}
+
 .answer-reveal-label {
   font-size: 0.74rem;
   letter-spacing: 0.12em;
@@ -207,7 +204,7 @@
 
 .answer-panel-header {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .answer-mode-shell {
@@ -272,7 +269,7 @@
 
 .answer-guidance {
   color: var(--text-muted);
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
 .summary-panel[hidden] {
@@ -321,7 +318,6 @@
 @media (max-width: 640px) {
   .round-card,
   .answer-panel,
-  .feedback-panel,
   .summary-panel {
     padding: 18px;
   }
