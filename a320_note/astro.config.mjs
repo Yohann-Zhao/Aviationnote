@@ -88,6 +88,15 @@ export default defineConfig({
 						{ label: 'Ventilation System', translations: { 'zh-CN': '通风系统' }, badge: { text: 'In Progress', variant: 'caution' }, link: '/ventilation/ventilation_system' },
 					],
 				},
+				{
+					label: 'APU',
+					translations: {
+						'zh-CN': 'APU',//这里要大写CN
+					},
+					items: [
+						{ label: 'APU System', translations: { 'zh-CN': 'APU系统' }, badge: { text: 'In Progress', variant: 'caution' }, link: '/apu/apu_system' },
+					],
+				},
 			],
 		}),
 	],
