@@ -1,0 +1,17 @@
+{
+  "name": "callsign-practice",
+  "private": true,
+  "scripts": {
+    "dev": "netlify dev",
+    "dev:astro": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "devDependencies": {
+    "astro": "^6.0.8"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.2.2",
+    "tailwindcss": "^4.2.2"
+  }
+}

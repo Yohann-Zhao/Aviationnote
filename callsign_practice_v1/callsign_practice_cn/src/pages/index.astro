@@ -1,0 +1,1537 @@
+---
+import "../styles/tailwind.css";
+import { PRACTICE_MODES } from "../lib/callsign.js";
+import {
+  ACCENT_OPTIONS_ZH,
+  ANSWER_MODES_ZH,
+  HOME_COPY,
+  formatOtherMetaLabel,
+  formatOtherPrimaryLabel,
+  formatVoiceMetaLabel,
+  getModeDisplayValue,
+  getModeMetaLabel
+} from "../lib/copy-zh.js";
+
+const pageTitle = HOME_COPY.pageTitle;
+const accentOptions = ACCENT_OPTIONS_ZH;
+const answerModes = ANSWER_MODES_ZH;
+const defaultSpeakingRate = 1.2;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+  </head>
+  <body>
+    <div hidden aria-hidden="true">
+      <label>
+        {HOME_COPY.hiddenLabels.practiceMode}
+        <select id="practiceMode">
+          {PRACTICE_MODES.map((mode) => (
+            <option value={mode.id} data-detail={mode.summary} selected={mode.id === "mixed"}>
+              {mode.label}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label>
+        {HOME_COPY.hiddenLabels.answerMode}
+        <select id="answerMode">
+          {answerModes.map((mode) => (
+            <option value={mode.value}>{mode.label}</option>
+          ))}
+        </select>
+      </label>
+
+      <label>
+        {HOME_COPY.hiddenLabels.accent}
+        <select id="accentSelect">
+          {accentOptions.map((accent) => (
+            <option value={accent.value}>{accent.label}</option>
+          ))}
+        </select>
+      </label>
+    </div>
+
+    <main class="practice-app practice-app-home">
+      <section class="practice-main">
+        <section id="roundCard" class="panel round-card" data-question-state="idle" data-tone="neutral">
+            <div class="round-header">
+              <div class="round-topline">
+                <p class="round-indicator">
+                  {HOME_COPY.roundLabel} <strong id="roundChipValue">1 / 10</strong>
+                </p>
+
+                <div class="round-toolbar">
+                  <button
+                    type="button"
+                    class="settings-launch-chip settings-launch-chip-mode"
+                    data-settings-launch="mode"
+                    aria-haspopup="dialog"
+                    aria-controls="settingsModal"
+                  >
+                    <strong id="modeLaunchValue" class="settings-launch-value">
+                      {getModeDisplayValue("mixed")}
+                    </strong>
+                    <span id="modeLaunchMeta" class="settings-launch-meta">
+                      {getModeMetaLabel("mixed")}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="settings-launch-chip"
+                    data-settings-launch="voice"
+                    aria-haspopup="dialog"
+                    aria-controls="settingsModal"
+                  >
+                    <strong id="voiceLaunchValue" class="settings-launch-value">{accentOptions[0].label}</strong>
+                    <span id="voiceLaunchMeta" class="settings-launch-meta">
+                      {formatVoiceMetaLabel(defaultSpeakingRate, true)}
+                    </span>
+                  </button>
+
+                  <a class="round-utility-link" href="/help">{HOME_COPY.aboutLink}</a>
+                </div>
+              </div>
+
+              <div class="signal-stage">
+                <div class="signal-visual" aria-hidden="true">
+                  <canvas id="signalCanvas" class="signal-waveform" aria-hidden="true"></canvas>
+                  <div class="signal-ring"></div>
+                  <div class="signal-sweep"></div>
+                  <div class="signal-bars">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                </div>
+
+                <div class="signal-copy">
+                  <p id="statusEyebrow" class="eyebrow signal-eyebrow">{HOME_COPY.readyEyebrow}</p>
+                  <h2 id="instructionOutput">{HOME_COPY.readyHeading}</h2>
+                  <p id="statusOutput" class="status-copy">{HOME_COPY.readyStatus}</p>
+                  <strong id="answerOutput" class="signal-answer-output" hidden></strong>
+                  <p id="answerMeta" class="status-copy signal-support" hidden></p>
+                  <p id="phraseOutput" class="status-copy signal-support" hidden></p>
+                  <p id="submittedOutput" class="status-copy signal-support" hidden></p>
+                </div>
+              </div>
+            </div>
+
+            <div class="round-controls">
+              <button id="primaryActionButton" type="button" class="primary-button">{HOME_COPY.primaryButtons.play}</button>
+              <button id="replayButton" type="button" class="secondary-button" disabled>{HOME_COPY.primaryButtons.replay}</button>
+              <button
+                id="customLettersShortcut"
+                type="button"
+                class="secondary-button"
+                data-settings-launch="customLetters"
+                aria-haspopup="dialog"
+                aria-controls="settingsModal"
+                hidden
+              >
+                {HOME_COPY.primaryButtons.customLetters}
+              </button>
+              <button id="revealButton" type="button" class="ghost-button" disabled>{HOME_COPY.primaryButtons.showAnswer}</button>
+            </div>
+          </section>
+
+          <section id="answerPanel" class="panel answer-panel" data-answer-mode="typed">
+            <div class="answer-panel-top">
+              <div class="answer-panel-header">
+                <p class="eyebrow">{HOME_COPY.answerPanel.eyebrow}</p>
+                <h2 id="answerHeading">{HOME_COPY.answerPanel.typedHeading}</h2>
+              </div>
+
+              <div class="answer-mode-switch" aria-label={HOME_COPY.answerPanel.modeAriaLabel}>
+                {answerModes.map((mode) => (
+                  <button
+                    type="button"
+                    class="answer-mode-button"
+                    data-answer-mode-option={mode.value}
+                    aria-pressed={mode.value === "typed" ? "true" : "false"}
+                  >
+                    {mode.toggleLabel}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div id="answerModeShell" class="answer-mode-shell" data-ready="false">
+              <div id="typedSection" class="typed-shell">
+                <label class="sr-only" for="answerInput">{HOME_COPY.answerPanel.inputLabel}</label>
+                <input
+                  id="answerInput"
+                  class="typed-answer"
+                  type="text"
+                  placeholder={HOME_COPY.answerPanel.inputPlaceholder}
+                  autocomplete="off"
+                  autocapitalize="characters"
+                  spellcheck="false"
+                  data-answer-state="locked"
+                />
+              </div>
+
+              <div id="choiceSection" class="choice-shell" hidden>
+                <div
+                  id="choiceButtons"
+                  class="choice-grid"
+                  role="listbox"
+                  aria-label={HOME_COPY.answerPanel.choiceListAriaLabel}
+                ></div>
+              </div>
+            </div>
+          </section>
+
+          <section id="sessionSummaryPanel" class="panel summary-panel" hidden>
+            <p class="eyebrow">{HOME_COPY.summaryPanel.eyebrow}</p>
+            <h2>{HOME_COPY.summaryPanel.heading}</h2>
+
+            <div class="summary-grid">
+              <div class="summary-card">
+                <span>{HOME_COPY.summaryPanel.completedLabel}</span>
+                <strong id="summaryCompleted">{HOME_COPY.summaryPanel.completedValue}</strong>
+              </div>
+              <div class="summary-card">
+                <span>{HOME_COPY.summaryPanel.accuracyLabel}</span>
+                <strong id="summaryAccuracy">{HOME_COPY.summaryPanel.accuracyValue}</strong>
+              </div>
+              <div class="summary-card">
+                <span>{HOME_COPY.summaryPanel.bestStreakLabel}</span>
+                <strong id="summaryBestStreak">{HOME_COPY.summaryPanel.bestStreakValue}</strong>
+              </div>
+            </div>
+
+            <p id="summaryEncouragement" class="summary-note">
+              {HOME_COPY.summaryPanel.encouragement}
+            </p>
+          </section>
+        </section>
+
+      <dialog id="settingsModal" class="settings-modal" aria-labelledby="settingsDialogTitle">
+        <div class="panel settings-modal-shell">
+          <div class="settings-modal-header">
+            <div class="settings-modal-copy-block">
+              <p class="eyebrow">{HOME_COPY.settings.eyebrow}</p>
+              <h2 id="settingsDialogTitle">{HOME_COPY.settings.title}</h2>
+              <p class="settings-modal-copy">
+                {HOME_COPY.settings.copy}
+              </p>
+            </div>
+
+            <button id="settingsCloseButton" type="button" class="ghost-button settings-close-button">
+              {HOME_COPY.settings.close}
+            </button>
+          </div>
+
+          <div class="settings-section-stack">
+            <section class="settings-section" data-settings-section="mode">
+              <button
+                type="button"
+                class="settings-section-toggle"
+                data-settings-toggle="mode"
+                aria-expanded="true"
+                aria-controls="settingsModePanel"
+              >
+                <span class="settings-section-heading">
+                  <span class="settings-section-label">{HOME_COPY.settings.sections.mode}</span>
+                  <strong id="modeSectionValue">{PRACTICE_MODES[0].label}</strong>
+                </span>
+                <span id="modeSectionSummary" class="settings-section-summary">
+                  {PRACTICE_MODES[0].summary}
+                </span>
+              </button>
+
+              <div id="settingsModePanel" class="settings-section-panel">
+                <div class="settings-option-grid">
+                  {PRACTICE_MODES.map((mode) => (
+                    <button type="button" class="settings-option-card" data-mode-option={mode.id}>
+                      <span class="settings-option-label">{mode.label}</span>
+                      <span class="settings-option-detail">{mode.summary}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            <section class="settings-section" data-settings-section="voice">
+              <button
+                type="button"
+                class="settings-section-toggle"
+                data-settings-toggle="voice"
+                aria-expanded="false"
+                aria-controls="settingsVoicePanel"
+              >
+                <span class="settings-section-heading">
+                  <span class="settings-section-label">{HOME_COPY.settings.sections.voice}</span>
+                  <strong id="voiceSectionValue">{accentOptions[0].label}</strong>
+                </span>
+                <span id="voiceSectionSummary" class="settings-section-summary">
+                  {formatVoiceMetaLabel(defaultSpeakingRate, true)}
+                </span>
+              </button>
+
+              <div id="settingsVoicePanel" class="settings-section-panel" hidden>
+                <div class="settings-field-group">
+                  <div class="settings-field-label-row">
+                    <label class="settings-field-label">{HOME_COPY.settings.voice.accentLabel}</label>
+                    <span class="settings-field-note">{HOME_COPY.settings.voice.accentNote}</span>
+                  </div>
+                  <div class="settings-option-grid compact-grid">
+                    {accentOptions.map((accent) => (
+                      <button type="button" class="settings-option-card compact-card" data-accent-option={accent.value}>
+                        <span class="settings-option-label">{accent.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <label class="settings-field">
+                  <span class="settings-field-label">{HOME_COPY.settings.voice.speakingRateLabel}</span>
+                  <input
+                    id="speakingRate"
+                    type="range"
+                    min="0.25"
+                    max="2"
+                    step="0.05"
+                    value={defaultSpeakingRate}
+                  />
+                  <span class="range-meta">
+                    <span>{HOME_COPY.settings.voice.speakingRateRange}</span>
+                    <strong id="speakingRateValue">{defaultSpeakingRate.toFixed(2)}x</strong>
+                  </span>
+                </label>
+
+                <label class="settings-toggle-card">
+                  <input id="radioToneCheckbox" type="checkbox" checked />
+                  <span class="settings-toggle-copy">
+                    <strong>{HOME_COPY.settings.voice.radioToneLabel}</strong>
+                    <span>{HOME_COPY.settings.voice.radioToneNote}</span>
+                  </span>
+                </label>
+              </div>
+            </section>
+
+            <section class="settings-section" data-settings-section="other">
+              <button
+                type="button"
+                class="settings-section-toggle"
+                data-settings-toggle="other"
+                aria-expanded="false"
+                aria-controls="settingsOtherPanel"
+              >
+                <span class="settings-section-heading">
+                  <span class="settings-section-label">{HOME_COPY.settings.sections.other}</span>
+                  <strong id="otherSectionValue">{formatOtherPrimaryLabel(true, true)}</strong>
+                </span>
+                <span id="otherSectionSummary" class="settings-section-summary">{formatOtherMetaLabel(true, true)}</span>
+              </button>
+
+              <div id="settingsOtherPanel" class="settings-section-panel" hidden>
+                <div class="settings-toggle-grid">
+                  <label class="settings-toggle-card">
+                    <input id="soundCheckbox" type="checkbox" checked />
+                    <span class="settings-toggle-copy">
+                      <strong>{HOME_COPY.settings.other.soundLabel}</strong>
+                      <span>{HOME_COPY.settings.other.soundNote}</span>
+                    </span>
+                  </label>
+
+                  <label class="settings-toggle-card">
+                    <input id="vibrationCheckbox" type="checkbox" checked />
+                    <span class="settings-toggle-copy">
+                      <strong>{HOME_COPY.settings.other.vibrationLabel}</strong>
+                      <span>{HOME_COPY.settings.other.vibrationNote}</span>
+                    </span>
+                  </label>
+                </div>
+              </div>
+            </section>
+
+            <section class="settings-section" data-settings-section="customLetters">
+              <button
+                type="button"
+                class="settings-section-toggle"
+                data-settings-toggle="customLetters"
+                aria-expanded="false"
+                aria-controls="settingsCustomLettersPanel"
+              >
+                <span class="settings-section-heading">
+                  <span class="settings-section-label">{HOME_COPY.settings.sections.customLetters}</span>
+                  <strong id="customLettersSectionValue">{HOME_COPY.settings.customLetters.defaultValue}</strong>
+                </span>
+                <span id="customLettersSectionSummary" class="settings-section-summary">
+                  {HOME_COPY.settings.customLetters.defaultSummary}
+                </span>
+              </button>
+
+              <div id="settingsCustomLettersPanel" class="settings-section-panel" hidden>
+                <label class="settings-field">
+                  <span class="settings-field-label">{HOME_COPY.settings.customLetters.label}</span>
+                  <input
+                    id="customLetters"
+                    type="text"
+                    maxlength="26"
+                    placeholder={HOME_COPY.settings.customLetters.placeholder}
+                  />
+                  <span class="supporting-text">{HOME_COPY.settings.customLetters.note}</span>
+                </label>
+
+                <label class="settings-field">
+                  <span class="settings-field-label">{HOME_COPY.settings.customLetters.lengthLabel}</span>
+                  <input id="letterLength" type="number" min="2" max="8" value="4" />
+                  <span class="supporting-text">{HOME_COPY.settings.customLetters.lengthNote}</span>
+                </label>
+              </div>
+            </section>
+          </div>
+        </div>
+      </dialog>
+
+      <div id="toastHost" class="toast-stack" aria-live="polite" aria-atomic="true"></div>
+      <audio id="audioPlayer" preload="none" hidden></audio>
+    </main>
+
+    <script>
+      import {
+        buildAnswerChoices,
+        buildCallsignSample,
+        normalizeCustomLetterSet
+      } from "../lib/callsign.js";
+      import {
+        HOME_COPY,
+        formatAcceptedInputCopy,
+        formatCustomLettersPrimaryLabel,
+        formatOtherMetaLabel,
+        formatOtherPrimaryLabel,
+        formatPronunciationCopy,
+        formatSessionCompleteStatus,
+        formatSubmittedAnswerCopy,
+        formatVoiceMetaLabel,
+        getCustomLettersSummaryCopy,
+        getModeDisplayValue,
+        getModeMetaLabel
+      } from "../lib/copy-zh.js";
+      import { clearTtsAudioCache, fetchTtsAudioUrl } from "../lib/tts-client.js";
+      import {
+        applyAnswerResult,
+        buildSessionSummary,
+        createPracticeSession,
+        isSessionComplete
+      } from "../lib/practice-session.js";
+      import {
+        QUESTION_STATES,
+        canSubmitAnswer,
+        getChoiceState,
+        isMultipleChoiceMode,
+        resolveRoundAnswer
+      } from "../lib/answer-flow.js";
+      import { getProgressMilestoneMessage, getStreakMilestoneMessage } from "../lib/ui-feedback.js";
+      import { fadeOut, pop, shake, slideIn } from "../lib/ui-animations.js";
+      import {
+        createUiAudioController,
+        getUiAudioContext,
+        resetUiAudioContext,
+        supportsUiAudio,
+        supportsUiVibration
+      } from "../lib/ui-audio.js";
+
+      const practiceModeSelect = document.querySelector("#practiceMode");
+      const answerModeSelect = document.querySelector("#answerMode");
+      const accentSelect = document.querySelector("#accentSelect");
+      const customLettersInput = document.querySelector("#customLetters");
+      const letterLengthInput = document.querySelector("#letterLength");
+      const speakingRateInput = document.querySelector("#speakingRate");
+      const speakingRateValue = document.querySelector("#speakingRateValue");
+      const radioToneCheckbox = document.querySelector("#radioToneCheckbox");
+      const soundCheckbox = document.querySelector("#soundCheckbox");
+      const vibrationCheckbox = document.querySelector("#vibrationCheckbox");
+      const roundCard = document.querySelector("#roundCard");
+      const roundChipValue = document.querySelector("#roundChipValue");
+      const statusEyebrow = document.querySelector("#statusEyebrow");
+      const instructionOutput = document.querySelector("#instructionOutput");
+      const statusOutput = document.querySelector("#statusOutput");
+      const primaryActionButton = document.querySelector("#primaryActionButton");
+      const replayButton = document.querySelector("#replayButton");
+      const customLettersShortcut = document.querySelector("#customLettersShortcut");
+      const revealButton = document.querySelector("#revealButton");
+      const answerOutput = document.querySelector("#answerOutput");
+      const answerMeta = document.querySelector("#answerMeta");
+      const phraseOutput = document.querySelector("#phraseOutput");
+      const submittedOutput = document.querySelector("#submittedOutput");
+      const answerPanel = document.querySelector("#answerPanel");
+      const answerHeading = document.querySelector("#answerHeading");
+      const answerModeShell = document.querySelector("#answerModeShell");
+      const answerInput = document.querySelector("#answerInput");
+      const typedSection = document.querySelector("#typedSection");
+      const choiceSection = document.querySelector("#choiceSection");
+      const choiceButtons = document.querySelector("#choiceButtons");
+      const sessionSummaryPanel = document.querySelector("#sessionSummaryPanel");
+      const summaryCompleted = document.querySelector("#summaryCompleted");
+      const summaryAccuracy = document.querySelector("#summaryAccuracy");
+      const summaryBestStreak = document.querySelector("#summaryBestStreak");
+      const summaryEncouragement = document.querySelector("#summaryEncouragement");
+      const toastHost = document.querySelector("#toastHost");
+      const audioPlayer = document.querySelector("#audioPlayer");
+      const modeLaunchValue = document.querySelector("#modeLaunchValue");
+      const modeLaunchMeta = document.querySelector("#modeLaunchMeta");
+      const voiceLaunchValue = document.querySelector("#voiceLaunchValue");
+      const voiceLaunchMeta = document.querySelector("#voiceLaunchMeta");
+      const modeSectionValue = document.querySelector("#modeSectionValue");
+      const modeSectionSummary = document.querySelector("#modeSectionSummary");
+      const voiceSectionValue = document.querySelector("#voiceSectionValue");
+      const voiceSectionSummary = document.querySelector("#voiceSectionSummary");
+      const otherSectionValue = document.querySelector("#otherSectionValue");
+      const otherSectionSummary = document.querySelector("#otherSectionSummary");
+      const customLettersSectionValue = document.querySelector("#customLettersSectionValue");
+      const customLettersSectionSummary = document.querySelector("#customLettersSectionSummary");
+      const settingsModal = document.querySelector("#settingsModal");
+      const signalCanvas = document.querySelector("#signalCanvas");
+      const signalCanvasContext = signalCanvas?.getContext("2d");
+      let waveformAnalyser = null;
+      let waveformSourceNode = null;
+      let waveformAnimationFrame = null;
+      let waveformUsesMediaElementSource = false;
+      const settingsCloseButton = document.querySelector("#settingsCloseButton");
+      const settingsLaunchButtons = Array.from(document.querySelectorAll("[data-settings-launch]"));
+      const settingsSectionElements = Array.from(document.querySelectorAll("[data-settings-section]"));
+      const settingsSectionToggles = Array.from(document.querySelectorAll("[data-settings-toggle]"));
+      const modeOptionButtons = Array.from(document.querySelectorAll("[data-mode-option]"));
+      const accentOptionButtons = Array.from(document.querySelectorAll("[data-accent-option]"));
+      const answerModeButtons = Array.from(document.querySelectorAll("[data-answer-mode-option]"));
+
+      let sessionState = createPracticeSession({ targetCount: 10 });
+      let currentSample = null;
+      let currentChoices = [];
+      let currentResolution = null;
+      let questionState = QUESTION_STATES.IDLE;
+      let answerRevealed = false;
+      let selectedChoiceValue = "";
+      let transientFeedback = null;
+      let primaryActionPending = false;
+      let expandedSettingsSection = "mode";
+
+      function resizeSignalCanvas() {
+        if (!signalCanvas || !signalCanvasContext) {
+          return;
+        }
+
+        const rect = signalCanvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        const width = Math.max(1, Math.floor(rect.width * dpr));
+        const height = Math.max(1, Math.floor(rect.height * dpr));
+
+        if (signalCanvas.width !== width || signalCanvas.height !== height) {
+          signalCanvas.width = width;
+          signalCanvas.height = height;
+        }
+
+        signalCanvasContext.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function stopWaveformMonitoring() {
+        if (waveformAnimationFrame !== null) {
+          window.cancelAnimationFrame(waveformAnimationFrame);
+          waveformAnimationFrame = null;
+        }
+
+        if (signalCanvasContext && signalCanvas) {
+          signalCanvasContext.clearRect(0, 0, signalCanvas.width, signalCanvas.height);
+        }
+      }
+
+      function drawSignalWaveform() {
+        if (!signalCanvas || !signalCanvasContext || !waveformAnalyser) {
+          stopWaveformMonitoring();
+          return;
+        }
+
+        const rect = signalCanvas.getBoundingClientRect();
+        const width = rect.width;
+        const height = rect.height;
+        const bufferLength = waveformAnalyser.fftSize;
+        const data = new Uint8Array(bufferLength);
+
+        waveformAnalyser.getByteTimeDomainData(data);
+
+        signalCanvasContext.clearRect(0, 0, width, height);
+        signalCanvasContext.fillStyle = "rgba(7, 18, 34, 0.30)";
+        signalCanvasContext.fillRect(0, 0, width, height);
+        signalCanvasContext.lineWidth = 2;
+        signalCanvasContext.strokeStyle = "rgba(255, 255, 255, 0.95)";
+        signalCanvasContext.beginPath();
+
+        const sliceWidth = width / bufferLength;
+        let x = 0;
+
+        for (let i = 0; i < bufferLength; i += 1) {
+          const v = data[i] / 128.0;
+          const y = (v * height) / 2;
+
+          if (i === 0) {
+            signalCanvasContext.moveTo(x, y);
+          } else {
+            signalCanvasContext.lineTo(x, y);
+          }
+
+          x += sliceWidth;
+        }
+
+        signalCanvasContext.stroke();
+        waveformAnimationFrame = window.requestAnimationFrame(drawSignalWaveform);
+      }
+
+      function createWaveformAnalyzer() {
+        if (waveformAnalyser || !signalCanvas) {
+          return waveformAnalyser;
+        }
+
+        const context = getUiAudioContext();
+        if (!context) {
+          return null;
+        }
+
+        const analyser = context.createAnalyser();
+        analyser.fftSize = 2048;
+        analyser.smoothingTimeConstant = 0.8;
+
+        const stream = audioPlayer.captureStream?.();
+
+        if (stream && stream.getAudioTracks().length > 0) {
+          const source = context.createMediaStreamSource(stream);
+          source.connect(analyser);
+        } else {
+          try {
+            waveformSourceNode = context.createMediaElementSource(audioPlayer);
+            waveformSourceNode.connect(analyser);
+            analyser.connect(context.destination);
+            waveformUsesMediaElementSource = true;
+          } catch {
+            return null;
+          }
+        }
+
+        waveformAnalyser = analyser;
+        return waveformAnalyser;
+      }
+
+      function startWaveformMonitoring() {
+        if (!signalCanvas || !signalCanvasContext) {
+          return;
+        }
+
+        resizeSignalCanvas();
+        const analyzer = createWaveformAnalyzer();
+
+        if (!analyzer) {
+          return;
+        }
+
+        if (waveformAnimationFrame === null) {
+          drawSignalWaveform();
+        }
+      }
+
+      window.addEventListener("resize", resizeSignalCanvas);
+
+      const uiAudioController = createUiAudioController({
+        soundEnabled: soundCheckbox.checked,
+        vibrationEnabled: vibrationCheckbox.checked
+      });
+
+      function waitForNextFrame() {
+        return new Promise((resolve) => window.requestAnimationFrame(() => resolve()));
+      }
+
+      function cleanCustomLettersInput(value) {
+        return Array.from(
+          new Set(
+            String(value ?? "")
+              .toUpperCase()
+              .replace(/[^A-Z]/g, "")
+              .split("")
+          )
+        ).join("");
+      }
+
+      function cleanTypedAnswer(value) {
+        return String(value ?? "")
+          .toUpperCase()
+          .replace(/[^A-Z0-9 -]/g, "");
+      }
+
+      function normalizeSpeakingRate(value) {
+        const parsed = Number(value);
+
+        if (!Number.isFinite(parsed)) {
+          return 1.2;
+        }
+
+        return Math.min(2, Math.max(0.25, parsed));
+      }
+
+      function getSelectedModeLabel() {
+        return (
+          practiceModeSelect.options[practiceModeSelect.selectedIndex]?.textContent ??
+          practiceModeSelect.querySelector('option[value="mixed"]')?.textContent ??
+          ""
+        );
+      }
+
+      function getSelectedModeInstruction() {
+        return practiceModeSelect.options[practiceModeSelect.selectedIndex]?.dataset.detail ?? "";
+      }
+
+      function getSelectedModeDisplayValue() {
+        return getModeDisplayValue(practiceModeSelect.value);
+      }
+
+      function getSelectedModeMetaLabel() {
+        return getModeMetaLabel(practiceModeSelect.value);
+      }
+
+      function getSelectedModeGuidance() {
+        return getSelectedModeMetaLabel();
+      }
+
+      function getSelectedAccentLabel() {
+        return (
+          accentSelect.options[accentSelect.selectedIndex]?.textContent ??
+          accentSelect.querySelector('option[value="mixed"]')?.textContent ??
+          ""
+        );
+      }
+
+      function getPendingSubmissionValue() {
+        const value = isMultipleChoiceMode(answerModeSelect.value) ? selectedChoiceValue : answerInput.value;
+        return String(value ?? "").trim();
+      }
+
+      function getPlaybackOptions() {
+        return {
+          accent: accentSelect.value,
+          speakingRate: normalizeSpeakingRate(speakingRateInput.value),
+          radioTone: radioToneCheckbox.checked
+        };
+      }
+
+      function getVoiceMetaLabel() {
+        const options = getPlaybackOptions();
+        return formatVoiceMetaLabel(options.speakingRate, options.radioTone);
+      }
+
+      function getOtherPrimaryLabel() {
+        return formatOtherPrimaryLabel(soundCheckbox.checked, vibrationCheckbox.checked);
+      }
+
+      function getOtherMetaLabel() {
+        return formatOtherMetaLabel(soundCheckbox.checked, vibrationCheckbox.checked);
+      }
+
+      function getCustomLettersPrimaryLabel() {
+        const customLetters = cleanCustomLettersInput(customLettersInput.value) || HOME_COPY.settings.customLetters.defaultPool;
+        const letterLength = Number(letterLengthInput.value) || 4;
+        return formatCustomLettersPrimaryLabel(customLetters, letterLength);
+      }
+
+      function getCustomLettersSummaryLabel() {
+        return getCustomLettersSummaryCopy(practiceModeSelect.value);
+      }
+
+      function getGenerationOptions() {
+        const customLetters = cleanCustomLettersInput(customLettersInput.value);
+
+        return {
+          mode: practiceModeSelect.value,
+          customLetters,
+          letterLength: Number(letterLengthInput.value) || 4
+        };
+      }
+
+      function getCanSubmitCurrentAnswer() {
+        return canSubmitAnswer(answerModeSelect.value, answerInput.value, selectedChoiceValue);
+      }
+
+      function getPrimaryActionLabel() {
+        if (questionState === QUESTION_STATES.IDLE) {
+          return HOME_COPY.primaryButtons.play;
+        }
+
+        if (questionState === QUESTION_STATES.PREPARING) {
+          return HOME_COPY.primaryButtons.preparing;
+        }
+
+        if (questionState === QUESTION_STATES.LISTENING) {
+          return HOME_COPY.primaryButtons.listening;
+        }
+
+        if (questionState === QUESTION_STATES.CHECKING) {
+          return HOME_COPY.primaryButtons.checking;
+        }
+
+        if (questionState === QUESTION_STATES.RESOLVED) {
+          return HOME_COPY.primaryButtons.next;
+        }
+
+        if (questionState === QUESTION_STATES.SESSION_COMPLETE) {
+          return HOME_COPY.primaryButtons.restart;
+        }
+
+        if (isMultipleChoiceMode(answerModeSelect.value)) {
+          return getCanSubmitCurrentAnswer() ? HOME_COPY.primaryButtons.check : HOME_COPY.primaryButtons.chooseOption;
+        }
+
+        return getCanSubmitCurrentAnswer() ? HOME_COPY.primaryButtons.check : HOME_COPY.primaryButtons.typeToCheck;
+      }
+
+      function getRoundCardTone() {
+        if (transientFeedback?.tone) return transientFeedback.tone;
+        if (currentResolution) return currentResolution.isCorrect ? "success" : "error";
+        if (questionState === QUESTION_STATES.SESSION_COMPLETE) return "complete";
+        if (questionState === QUESTION_STATES.CHECKING) return "warning";
+        if (questionState === QUESTION_STATES.LISTENING) return "listening";
+        return "neutral";
+      }
+
+      function getStatusEyebrowText() {
+        if (transientFeedback?.eyebrow) return transientFeedback.eyebrow;
+        if (currentResolution) return currentResolution.isCorrect ? HOME_COPY.state.correct : HOME_COPY.state.incorrect;
+        if (answerRevealed && currentSample) return HOME_COPY.state.answerRevealed;
+        if (questionState === QUESTION_STATES.PREPARING) return HOME_COPY.state.preparing;
+        if (questionState === QUESTION_STATES.LISTENING) return HOME_COPY.state.listening;
+        if (questionState === QUESTION_STATES.CHECKING) return HOME_COPY.state.checking;
+        if (questionState === QUESTION_STATES.SESSION_COMPLETE) return HOME_COPY.state.sessionComplete;
+        if (currentSample) return HOME_COPY.state.yourTurn;
+        return HOME_COPY.readyEyebrow;
+      }
+
+      function getInstructionHeading() {
+        if (transientFeedback?.headline) return transientFeedback.headline;
+        if (currentResolution) return currentResolution.isCorrect ? HOME_COPY.headings.correct : HOME_COPY.headings.incorrect;
+        if (answerRevealed && currentSample) return HOME_COPY.headings.answerRevealed;
+        if (questionState === QUESTION_STATES.PREPARING) return HOME_COPY.headings.preparing;
+        if (questionState === QUESTION_STATES.LISTENING) return HOME_COPY.headings.listening;
+        if (questionState === QUESTION_STATES.CHECKING) return HOME_COPY.headings.checking;
+        if (questionState === QUESTION_STATES.SESSION_COMPLETE) return HOME_COPY.headings.sessionComplete;
+        if (currentSample) return currentSample.instruction;
+        return HOME_COPY.readyHeading;
+      }
+
+      function getRoundStatusCopy() {
+        if (transientFeedback?.detail) {
+          return transientFeedback.detail;
+        }
+
+        if (questionState === QUESTION_STATES.PREPARING) {
+          return HOME_COPY.status.preparing;
+        }
+
+        if (questionState === QUESTION_STATES.LISTENING) {
+          return "";
+        }
+
+        if (questionState === QUESTION_STATES.CHECKING) {
+          return "";
+        }
+
+        if (currentResolution) {
+          return "";
+        }
+
+        if (answerRevealed && currentSample) {
+          return "";
+        }
+
+        if (questionState === QUESTION_STATES.SESSION_COMPLETE) {
+          return formatSessionCompleteStatus(sessionState);
+        }
+
+        if (currentSample) {
+          return isMultipleChoiceMode(answerModeSelect.value)
+            ? HOME_COPY.status.multipleChoice
+            : HOME_COPY.status.typed;
+        }
+
+        return HOME_COPY.readyStatus;
+      }
+
+      function getAnswerHeading() {
+        if (questionState === QUESTION_STATES.SESSION_COMPLETE) {
+          return HOME_COPY.answerPanel.completeHeading;
+        }
+
+        return isMultipleChoiceMode(answerModeSelect.value)
+          ? HOME_COPY.answerPanel.choiceHeading
+          : HOME_COPY.answerPanel.typedHeading;
+      }
+
+      function getAnswerStateAttribute() {
+        if (
+          questionState === QUESTION_STATES.PREPARING ||
+          questionState === QUESTION_STATES.LISTENING ||
+          questionState === QUESTION_STATES.CHECKING ||
+          questionState === QUESTION_STATES.SESSION_COMPLETE
+        ) {
+          return "locked";
+        }
+
+        if (currentResolution?.isCorrect) return "correct";
+        if (currentResolution) return "incorrect";
+        return "idle";
+      }
+
+      function showToast(message, tone = "neutral") {
+        if (!message) {
+          return;
+        }
+
+        const toast = document.createElement("div");
+        toast.className = "toast";
+        toast.dataset.tone = tone;
+        toast.textContent = message;
+        toastHost.append(toast);
+        slideIn(toast);
+
+        window.setTimeout(() => {
+          fadeOut(toast, { duration: 180 });
+          window.setTimeout(() => {
+            toast.remove();
+          }, 220);
+        }, 2600);
+      }
+
+      function focusAnswerArea() {
+        if (questionState !== QUESTION_STATES.ANSWERING || !currentSample) {
+          return;
+        }
+
+        if (isMultipleChoiceMode(answerModeSelect.value)) {
+          const selectedChoice = choiceButtons.querySelector('[aria-pressed="true"]');
+          const firstChoice = choiceButtons.querySelector("button:not(:disabled)");
+          (selectedChoice ?? firstChoice)?.focus();
+          return;
+        }
+
+        answerInput.focus();
+        answerInput.select();
+      }
+
+      function clearTransientFeedback() {
+        transientFeedback = null;
+      }
+
+      function setTransientFeedback(headline, detail, tone = "neutral", eyebrow = headline) {
+        transientFeedback = {
+          tone,
+          eyebrow,
+          headline,
+          detail
+        };
+      }
+
+      function applySelectValue(selectElement, value) {
+        if (!selectElement || selectElement.value === value) {
+          return;
+        }
+
+        selectElement.value = value;
+        selectElement.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+
+      function setExpandedSettingsSection(sectionId) {
+        expandedSettingsSection = sectionId ?? "";
+
+        for (const sectionElement of settingsSectionElements) {
+          const sectionName = sectionElement.dataset.settingsSection;
+          const isOpen = sectionName === expandedSettingsSection;
+          const toggleButton = sectionElement.querySelector("[data-settings-toggle]");
+          const panel = sectionElement.querySelector(".settings-section-panel");
+
+          sectionElement.dataset.open = String(isOpen);
+          toggleButton?.setAttribute("aria-expanded", String(isOpen));
+
+          if (panel) {
+            panel.hidden = !isOpen;
+          }
+        }
+      }
+
+      function openSettingsModal(sectionId = "mode") {
+        setExpandedSettingsSection(sectionId);
+
+        if (!settingsModal.open) {
+          settingsModal.showModal();
+        }
+
+        window.requestAnimationFrame(() => {
+          document.querySelector(`[data-settings-toggle="${sectionId}"]`)?.focus();
+        });
+      }
+
+      function closeSettingsModal() {
+        if (settingsModal.open) {
+          settingsModal.close();
+        }
+      }
+
+      function renderSpeakingRateOutput() {
+        const speakingRate = normalizeSpeakingRate(speakingRateInput.value);
+        speakingRateValue.textContent = `${speakingRate.toFixed(2)}x`;
+      }
+
+      function renderOptionSelections() {
+        for (const button of modeOptionButtons) {
+          const isSelected = button.dataset.modeOption === practiceModeSelect.value;
+          button.dataset.selected = String(isSelected);
+          button.setAttribute("aria-pressed", String(isSelected));
+        }
+
+        for (const button of accentOptionButtons) {
+          const isSelected = button.dataset.accentOption === accentSelect.value;
+          button.dataset.selected = String(isSelected);
+          button.setAttribute("aria-pressed", String(isSelected));
+        }
+
+        for (const button of answerModeButtons) {
+          const isSelected = button.dataset.answerModeOption === answerModeSelect.value;
+          button.dataset.selected = String(isSelected);
+          button.setAttribute("aria-pressed", String(isSelected));
+          button.disabled = questionState === QUESTION_STATES.CHECKING;
+        }
+      }
+
+      function renderSettingsEntryCards() {
+        modeLaunchValue.textContent = getSelectedModeDisplayValue();
+        modeLaunchMeta.textContent = getSelectedModeGuidance();
+        voiceLaunchValue.textContent = getSelectedAccentLabel();
+        voiceLaunchMeta.textContent = getVoiceMetaLabel();
+      }
+
+      function renderSettingsSectionSummaries() {
+        modeSectionValue.textContent = getSelectedModeLabel();
+        modeSectionSummary.textContent = getSelectedModeInstruction();
+        voiceSectionValue.textContent = getSelectedAccentLabel();
+        voiceSectionSummary.textContent = getVoiceMetaLabel();
+        otherSectionValue.textContent = getOtherPrimaryLabel();
+        otherSectionSummary.textContent = getOtherMetaLabel();
+        customLettersSectionValue.textContent = getCustomLettersPrimaryLabel();
+        customLettersSectionSummary.textContent = getCustomLettersSummaryLabel();
+      }
+
+      function renderControlState() {
+        const mode = practiceModeSelect.value;
+        const usesCustomLetters = mode === "mixed" || mode === "generalAviation" || mode === "letters";
+        const usesLetterLength = mode === "letters";
+        const soundSupported = supportsUiAudio();
+        const vibrationSupported = supportsUiVibration();
+
+        customLettersInput.disabled = !usesCustomLetters;
+        letterLengthInput.disabled = !usesLetterLength;
+        customLettersShortcut.hidden = mode !== "letters";
+        soundCheckbox.disabled = !soundSupported;
+        vibrationCheckbox.disabled = !vibrationSupported;
+
+        if (!soundSupported) {
+          soundCheckbox.checked = false;
+          uiAudioController.setSoundEnabled(false);
+        }
+
+        if (!vibrationSupported) {
+          vibrationCheckbox.checked = false;
+          uiAudioController.setVibrationEnabled(false);
+        }
+      }
+
+      function renderAnswerReveal() {
+        const canRevealBeforeAnswer = Boolean(currentSample) && !currentResolution;
+        const isShowingAnswerDetails = Boolean(currentSample) && (answerRevealed || Boolean(currentResolution));
+        revealButton.hidden = !canRevealBeforeAnswer;
+        revealButton.disabled = !canRevealBeforeAnswer;
+        revealButton.textContent = answerRevealed
+          ? HOME_COPY.primaryButtons.hideAnswer
+          : HOME_COPY.primaryButtons.showAnswer;
+
+        statusOutput.hidden = false;
+        answerOutput.hidden = true;
+        answerOutput.textContent = "";
+        answerMeta.hidden = true;
+        answerMeta.textContent = "";
+        phraseOutput.hidden = true;
+        phraseOutput.textContent = "";
+        submittedOutput.hidden = true;
+        submittedOutput.textContent = "";
+
+        if (!currentSample) {
+          return;
+        }
+
+        if (!isShowingAnswerDetails) {
+          return;
+        }
+
+        statusOutput.hidden = true;
+        answerOutput.hidden = false;
+        answerOutput.textContent = currentSample.callsign;
+        answerMeta.hidden = currentResolution?.isCorrect ?? false;
+        answerMeta.textContent = answerMeta.hidden ? "" : formatAcceptedInputCopy(currentSample);
+        phraseOutput.hidden = false;
+        phraseOutput.textContent = formatPronunciationCopy(currentSample.spokenPhrase);
+
+        const submittedValue = currentResolution?.submittedValue?.trim() ?? "";
+
+        if (currentResolution && !currentResolution.isCorrect && submittedValue) {
+          submittedOutput.hidden = false;
+          submittedOutput.textContent = formatSubmittedAnswerCopy(submittedValue);
+        }
+      }
+
+      function renderChoices() {
+        choiceButtons.innerHTML = "";
+
+        if (!currentSample) {
+          return;
+        }
+
+        for (const choice of currentChoices) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "choice-card";
+          button.dataset.value = choice.value;
+          button.textContent = choice.displayValue ?? choice.value;
+
+          if (currentResolution) {
+            button.dataset.choiceState = getChoiceState(choice.value, currentResolution);
+          } else if (choice.value === selectedChoiceValue) {
+            button.dataset.choiceState = "selected";
+          } else {
+            button.dataset.choiceState = "idle";
+          }
+
+          button.setAttribute("aria-pressed", choice.value === selectedChoiceValue ? "true" : "false");
+          button.disabled = questionState !== QUESTION_STATES.ANSWERING || Boolean(currentResolution);
+          button.addEventListener("click", () => {
+            if (questionState !== QUESTION_STATES.ANSWERING || currentResolution) {
+              return;
+            }
+
+            clearTransientFeedback();
+            selectedChoiceValue = choice.value;
+            renderAnswerPanel();
+            renderPrimaryAction();
+            void submitCurrentAnswer();
+          });
+          choiceButtons.append(button);
+        }
+      }
+
+      function renderRoundCard() {
+        const roundStatusCopy = getRoundStatusCopy();
+        roundCard.dataset.questionState = questionState;
+        roundCard.dataset.tone = getRoundCardTone();
+        roundChipValue.textContent = `${Math.min(sessionState.completedCount + 1, sessionState.targetCount)} / ${sessionState.targetCount}`;
+        statusEyebrow.textContent = getStatusEyebrowText();
+        instructionOutput.textContent = getInstructionHeading();
+        statusOutput.hidden = !roundStatusCopy;
+        statusOutput.textContent = roundStatusCopy;
+      }
+
+      function renderAnswerPanel() {
+        answerPanel.dataset.answerMode = answerModeSelect.value;
+        answerHeading.textContent = getAnswerHeading();
+        answerModeShell.dataset.ready = String(getCanSubmitCurrentAnswer());
+        typedSection.hidden = isMultipleChoiceMode(answerModeSelect.value);
+        choiceSection.hidden = !isMultipleChoiceMode(answerModeSelect.value);
+        answerInput.disabled =
+          !currentSample ||
+          questionState === QUESTION_STATES.PREPARING ||
+          questionState === QUESTION_STATES.LISTENING ||
+          questionState === QUESTION_STATES.CHECKING ||
+          questionState === QUESTION_STATES.SESSION_COMPLETE ||
+          Boolean(currentResolution);
+        answerInput.dataset.answerState = getAnswerStateAttribute();
+
+        renderChoices();
+        renderOptionSelections();
+      }
+
+      function renderSummaryPanel() {
+        const showSummary = questionState === QUESTION_STATES.SESSION_COMPLETE;
+        sessionSummaryPanel.hidden = !showSummary;
+
+        if (!showSummary) {
+          return;
+        }
+
+        const summary = buildSessionSummary(sessionState, getSelectedModeLabel());
+        summaryCompleted.textContent = summary.completedLabel;
+        summaryAccuracy.textContent = summary.accuracyLabel;
+        summaryBestStreak.textContent = summary.streakLabel;
+        summaryEncouragement.textContent = summary.encouragement;
+      }
+
+      function renderPrimaryAction() {
+        primaryActionButton.textContent = getPrimaryActionLabel();
+        primaryActionButton.disabled =
+          primaryActionPending ||
+          questionState === QUESTION_STATES.PREPARING ||
+          questionState === QUESTION_STATES.LISTENING ||
+          questionState === QUESTION_STATES.CHECKING ||
+          (questionState === QUESTION_STATES.ANSWERING &&
+            (isMultipleChoiceMode(answerModeSelect.value) || !getCanSubmitCurrentAnswer()));
+
+        replayButton.disabled =
+          !currentSample ||
+          questionState === QUESTION_STATES.PREPARING ||
+          questionState === QUESTION_STATES.LISTENING ||
+          questionState === QUESTION_STATES.CHECKING;
+      }
+
+      function renderApp() {
+        renderSpeakingRateOutput();
+        renderControlState();
+        renderSettingsEntryCards();
+        renderSettingsSectionSummaries();
+        renderRoundCard();
+        renderAnswerReveal();
+        renderAnswerPanel();
+        renderSummaryPanel();
+        renderPrimaryAction();
+      }
+
+      function notifyMilestones(milestones) {
+        const streakHit = milestones.streak.at(0);
+        const progressHit = milestones.progress.at(0);
+
+        if (streakHit) {
+          showToast(getStreakMilestoneMessage(streakHit), "success");
+        }
+
+        if (progressHit) {
+          showToast(getProgressMilestoneMessage(progressHit), "neutral");
+        }
+
+        if (streakHit || progressHit) {
+          void uiAudioController.playFeedback("milestone");
+        }
+      }
+
+      async function playCurrentSample() {
+        if (!currentSample) {
+          return;
+        }
+
+        clearTransientFeedback();
+        questionState = QUESTION_STATES.LISTENING;
+        renderApp();
+
+        try {
+          const audioUrl = await fetchTtsAudioUrl(currentSample.spokenPhrase, getPlaybackOptions());
+          audioPlayer.pause();
+          audioPlayer.src = audioUrl;
+          audioPlayer.currentTime = 0;
+          await audioPlayer.play();
+        } catch (error) {
+          questionState = currentResolution
+            ? isSessionComplete(sessionState)
+              ? QUESTION_STATES.SESSION_COMPLETE
+              : QUESTION_STATES.RESOLVED
+            : QUESTION_STATES.ANSWERING;
+          setTransientFeedback(
+            HOME_COPY.transientFeedback.audioIssueHeadline,
+            error instanceof Error ? error.message : HOME_COPY.transientFeedback.audioIssueDetail,
+            "error"
+          );
+          renderApp();
+        }
+      }
+
+      async function startRound({ resetSession = false } = {}) {
+        if (resetSession) {
+          sessionState = createPracticeSession({ targetCount: 10 });
+        }
+
+        clearTransientFeedback();
+        answerRevealed = false;
+        currentResolution = null;
+        selectedChoiceValue = "";
+        answerInput.value = "";
+        audioPlayer.pause();
+        audioPlayer.currentTime = 0;
+        questionState = QUESTION_STATES.PREPARING;
+        renderApp();
+
+        try {
+          const generationOptions = getGenerationOptions();
+          currentSample = buildCallsignSample(generationOptions);
+          currentChoices = buildAnswerChoices(currentSample, {
+            count: 4,
+            customLetters: normalizeCustomLetterSet(generationOptions.customLetters)
+          });
+
+          renderApp();
+          slideIn(roundCard);
+          await uiAudioController.unlock();
+          await playCurrentSample();
+        } catch (error) {
+          questionState = QUESTION_STATES.IDLE;
+          currentSample = null;
+          currentChoices = [];
+          setTransientFeedback(
+            HOME_COPY.transientFeedback.prepareHeadline,
+            error instanceof Error ? error.message : HOME_COPY.transientFeedback.prepareDetail,
+            "error"
+          );
+          renderApp();
+        }
+      }
+
+      async function submitCurrentAnswer() {
+        if (!currentSample || questionState !== QUESTION_STATES.ANSWERING) {
+          return;
+        }
+
+        if (!getCanSubmitCurrentAnswer()) {
+          setTransientFeedback(
+            HOME_COPY.transientFeedback.answerFirstHeadline,
+            isMultipleChoiceMode(answerModeSelect.value)
+              ? HOME_COPY.transientFeedback.answerFirstChoice
+              : HOME_COPY.transientFeedback.answerFirstTyped,
+            "warning"
+          );
+          renderApp();
+          return;
+        }
+
+        clearTransientFeedback();
+        questionState = QUESTION_STATES.CHECKING;
+        renderApp();
+        const submitFeedbackPromise = uiAudioController.play("submit");
+        await waitForNextFrame();
+
+        currentResolution = resolveRoundAnswer(currentSample, {
+          answerMode: answerModeSelect.value,
+          typedAnswer: answerInput.value,
+          selectedChoice: selectedChoiceValue
+        });
+
+        const result = applyAnswerResult(sessionState, currentResolution.isCorrect);
+        sessionState = result.session;
+        questionState = isSessionComplete(sessionState)
+          ? QUESTION_STATES.SESSION_COMPLETE
+          : QUESTION_STATES.RESOLVED;
+
+        renderApp();
+        await submitFeedbackPromise;
+
+        if (currentResolution.isCorrect) {
+          pop(roundCard);
+          await uiAudioController.playFeedback("correct");
+        } else {
+          shake(answerPanel);
+          shake(roundCard);
+          await uiAudioController.playFeedback("incorrect");
+        }
+
+        notifyMilestones(result.milestones);
+
+        if (questionState === QUESTION_STATES.SESSION_COMPLETE) {
+          slideIn(sessionSummaryPanel);
+        }
+
+        primaryActionButton.focus();
+      }
+
+      async function handlePrimaryAction() {
+        if (primaryActionPending) {
+          return;
+        }
+
+        primaryActionPending = true;
+        renderPrimaryAction();
+
+        try {
+          await uiAudioController.unlock();
+
+          if (questionState === QUESTION_STATES.IDLE) {
+            await startRound({ resetSession: true });
+            return;
+          }
+
+          if (questionState === QUESTION_STATES.ANSWERING) {
+            await submitCurrentAnswer();
+            return;
+          }
+
+          if (questionState === QUESTION_STATES.RESOLVED) {
+            await startRound();
+            return;
+          }
+
+          if (questionState === QUESTION_STATES.SESSION_COMPLETE) {
+            await startRound({ resetSession: true });
+          }
+        } finally {
+          primaryActionPending = false;
+          renderPrimaryAction();
+        }
+      }
+
+      practiceModeSelect.addEventListener("change", () => {
+        clearTransientFeedback();
+        renderApp();
+      });
+
+      answerModeSelect.addEventListener("change", () => {
+        clearTransientFeedback();
+        selectedChoiceValue = "";
+        renderApp();
+      });
+
+      accentSelect.addEventListener("change", () => {
+        renderApp();
+      });
+
+      customLettersInput.addEventListener("input", () => {
+        customLettersInput.value = cleanCustomLettersInput(customLettersInput.value);
+        renderApp();
+      });
+
+      letterLengthInput.addEventListener("change", () => {
+        const value = Number(letterLengthInput.value) || 4;
+        letterLengthInput.value = String(Math.min(8, Math.max(2, value)));
+        renderApp();
+      });
+
+      speakingRateInput.addEventListener("input", () => {
+        renderApp();
+      });
+
+      radioToneCheckbox.addEventListener("change", () => {
+        renderApp();
+      });
+
+      soundCheckbox.addEventListener("change", () => {
+        uiAudioController.setSoundEnabled(soundCheckbox.checked);
+        renderApp();
+      });
+
+      vibrationCheckbox.addEventListener("change", () => {
+        uiAudioController.setVibrationEnabled(vibrationCheckbox.checked);
+        renderApp();
+      });
+
+      for (const button of settingsLaunchButtons) {
+        button.addEventListener("click", () => {
+          openSettingsModal(button.dataset.settingsLaunch);
+        });
+      }
+
+      for (const toggleButton of settingsSectionToggles) {
+        toggleButton.addEventListener("click", () => {
+          const sectionName = toggleButton.dataset.settingsToggle;
+          setExpandedSettingsSection(expandedSettingsSection === sectionName ? "" : sectionName);
+        });
+      }
+
+      for (const button of modeOptionButtons) {
+        button.addEventListener("click", () => {
+          applySelectValue(practiceModeSelect, button.dataset.modeOption);
+        });
+      }
+
+      for (const button of accentOptionButtons) {
+        button.addEventListener("click", () => {
+          applySelectValue(accentSelect, button.dataset.accentOption);
+        });
+      }
+
+      for (const button of answerModeButtons) {
+        button.addEventListener("click", () => {
+          applySelectValue(answerModeSelect, button.dataset.answerModeOption);
+        });
+      }
+
+      settingsCloseButton.addEventListener("click", () => {
+        closeSettingsModal();
+      });
+
+      settingsModal.addEventListener("click", (event) => {
+        if (event.target === settingsModal) {
+          closeSettingsModal();
+        }
+      });
+
+      primaryActionButton.addEventListener("click", () => {
+        void handlePrimaryAction();
+      });
+
+      replayButton.addEventListener("click", () => {
+        void playCurrentSample();
+      });
+
+      revealButton.addEventListener("click", () => {
+        answerRevealed = !answerRevealed;
+        renderApp();
+      });
+
+      answerInput.addEventListener("input", () => {
+        clearTransientFeedback();
+        answerInput.value = cleanTypedAnswer(answerInput.value);
+        renderAnswerPanel();
+        renderPrimaryAction();
+      });
+
+      answerInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+
+          if (questionState === QUESTION_STATES.ANSWERING) {
+            void submitCurrentAnswer();
+          }
+        }
+      });
+
+      audioPlayer.addEventListener("play", () => {
+        startWaveformMonitoring();
+      });
+
+      audioPlayer.addEventListener("pause", () => {
+        if (!audioPlayer.ended) {
+          stopWaveformMonitoring();
+        }
+      });
+
+      audioPlayer.addEventListener("ended", () => {
+        stopWaveformMonitoring();
+
+        if (!currentSample) {
+          return;
+        }
+
+        questionState = currentResolution
+          ? isSessionComplete(sessionState)
+            ? QUESTION_STATES.SESSION_COMPLETE
+            : QUESTION_STATES.RESOLVED
+          : QUESTION_STATES.ANSWERING;
+        renderApp();
+        focusAnswerArea();
+      });
+
+      window.addEventListener("beforeunload", () => {
+        clearTtsAudioCache();
+        resetUiAudioContext();
+      });
+
+      setExpandedSettingsSection("mode");
+      resizeSignalCanvas();
+      renderApp();
+    </script>
+  </body>
+</html>

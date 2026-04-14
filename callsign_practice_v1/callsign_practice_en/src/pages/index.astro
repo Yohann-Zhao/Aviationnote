@@ -1,0 +1,1536 @@
+---
+import "../styles/tailwind.css";
+import { PRACTICE_MODES } from "../lib/callsign.js";
+
+const pageTitle = "Callsign Practice";
+const accentOptions = [
+  { value: "mixed", label: "Mixed English" },
+  { value: "american", label: "American English" },
+  { value: "british", label: "British English" },
+  { value: "australian", label: "Australian English" },
+  { value: "indian", label: "Indian English" }
+];
+const answerModes = [
+  { value: "typed", label: "Type", toggleLabel: "Type" },
+  { value: "multipleChoice", label: "Select from 4 options", toggleLabel: "Select" }
+];
+const defaultSpeakingRate = 1.2;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+  </head>
+  <body>
+    <div hidden aria-hidden="true">
+      <label>
+        Callsign mode
+        <select id="practiceMode">
+          {PRACTICE_MODES.map((mode) => (
+            <option value={mode.id} data-detail={mode.summary} selected={mode.id === "mixed"}>
+              {mode.label}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label>
+        Answer mode
+        <select id="answerMode">
+          {answerModes.map((mode) => (
+            <option value={mode.value}>{mode.label}</option>
+          ))}
+        </select>
+      </label>
+
+      <label>
+        Accent
+        <select id="accentSelect">
+          {accentOptions.map((accent) => (
+            <option value={accent.value}>{accent.label}</option>
+          ))}
+        </select>
+      </label>
+    </div>
+
+    <main class="practice-app practice-app-home">
+      <section class="practice-main">
+        <section id="roundCard" class="panel round-card" data-question-state="idle" data-tone="neutral">
+            <div class="round-header">
+              <div class="round-topline">
+                <p class="round-indicator">
+                  Round <strong id="roundChipValue">1 / 10</strong>
+                </p>
+
+                <div class="round-toolbar">
+                  <button
+                    type="button"
+                    class="settings-launch-chip settings-launch-chip-mode"
+                    data-settings-launch="mode"
+                    aria-haspopup="dialog"
+                    aria-controls="settingsModal"
+                  >
+                    <strong id="modeLaunchValue" class="settings-launch-value">
+                      Transport / GA
+                    </strong>
+                    <span id="modeLaunchMeta" class="settings-launch-meta">
+                      Airline IATA + digits / Aircraft type + suffix
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="settings-launch-chip"
+                    data-settings-launch="voice"
+                    aria-haspopup="dialog"
+                    aria-controls="settingsModal"
+                  >
+                    <strong id="voiceLaunchValue" class="settings-launch-value">Mixed English</strong>
+                    <span id="voiceLaunchMeta" class="settings-launch-meta">1.20x / Radio on</span>
+                  </button>
+
+                  <a class="round-utility-link" href="/help">About</a>
+                </div>
+              </div>
+
+              <div class="signal-stage">
+                <div class="signal-visual" aria-hidden="true">
+                  <canvas id="signalCanvas" class="signal-waveform" aria-hidden="true"></canvas>
+                  <div class="signal-ring"></div>
+                  <div class="signal-sweep"></div>
+                  <div class="signal-bars">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                </div>
+
+                <div class="signal-copy">
+                  <p id="statusEyebrow" class="eyebrow signal-eyebrow">Ready</p>
+                  <h2 id="instructionOutput">Ready for your first callsign?</h2>
+                  <p id="statusOutput" class="status-copy">Start when you are ready.</p>
+                  <strong id="answerOutput" class="signal-answer-output" hidden></strong>
+                  <p id="answerMeta" class="status-copy signal-support" hidden></p>
+                  <p id="phraseOutput" class="status-copy signal-support" hidden></p>
+                  <p id="submittedOutput" class="status-copy signal-support" hidden></p>
+                </div>
+              </div>
+            </div>
+
+            <div class="round-controls">
+              <button id="primaryActionButton" type="button" class="primary-button">Play Callsign</button>
+              <button id="replayButton" type="button" class="secondary-button" disabled>Play Again</button>
+              <button
+                id="customLettersShortcut"
+                type="button"
+                class="secondary-button"
+                data-settings-launch="customLetters"
+                aria-haspopup="dialog"
+                aria-controls="settingsModal"
+                hidden
+              >
+                Custom Letters
+              </button>
+              <button id="revealButton" type="button" class="ghost-button" disabled>Show Answer</button>
+            </div>
+          </section>
+
+          <section id="answerPanel" class="panel answer-panel" data-answer-mode="typed">
+            <div class="answer-panel-top">
+              <div class="answer-panel-header">
+                <p class="eyebrow">Your Answer</p>
+                <h2 id="answerHeading">Type what you heard.</h2>
+              </div>
+
+              <div class="answer-mode-switch" aria-label="Answer mode">
+                {answerModes.map((mode) => (
+                  <button
+                    type="button"
+                    class="answer-mode-button"
+                    data-answer-mode-option={mode.value}
+                    aria-pressed={mode.value === "typed" ? "true" : "false"}
+                  >
+                    {mode.toggleLabel}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div id="answerModeShell" class="answer-mode-shell" data-ready="false">
+              <div id="typedSection" class="typed-shell">
+                <label class="sr-only" for="answerInput">Type the callsign answer</label>
+                <input
+                  id="answerInput"
+                  class="typed-answer"
+                  type="text"
+                  placeholder="Type the answer"
+                  autocomplete="off"
+                  autocapitalize="characters"
+                  spellcheck="false"
+                  data-answer-state="locked"
+                />
+              </div>
+
+              <div id="choiceSection" class="choice-shell" hidden>
+                <div id="choiceButtons" class="choice-grid" role="listbox" aria-label="Answer choices"></div>
+              </div>
+            </div>
+          </section>
+
+          <section id="sessionSummaryPanel" class="panel summary-panel" hidden>
+            <p class="eyebrow">Round Summary</p>
+            <h2>Session complete</h2>
+
+            <div class="summary-grid">
+              <div class="summary-card">
+                <span>Completed</span>
+                <strong id="summaryCompleted">10 callsigns completed</strong>
+              </div>
+              <div class="summary-card">
+                <span>Accuracy</span>
+                <strong id="summaryAccuracy">0% accuracy</strong>
+              </div>
+              <div class="summary-card">
+                <span>Best streak</span>
+                <strong id="summaryBestStreak">0</strong>
+              </div>
+            </div>
+
+            <p id="summaryEncouragement" class="summary-note">
+              Start another round when you want a fresh set of callsigns.
+            </p>
+          </section>
+        </section>
+
+      <dialog id="settingsModal" class="settings-modal" aria-labelledby="settingsDialogTitle">
+        <div class="panel settings-modal-shell">
+          <div class="settings-modal-header">
+            <div class="settings-modal-copy-block">
+              <p class="eyebrow">Practice Settings</p>
+              <h2 id="settingsDialogTitle">Tune the next transmission.</h2>
+              <p class="settings-modal-copy">
+                Open any section to see every available choice and the one that is active now.
+              </p>
+            </div>
+
+            <button id="settingsCloseButton" type="button" class="ghost-button settings-close-button">Close</button>
+          </div>
+
+          <div class="settings-section-stack">
+            <section class="settings-section" data-settings-section="mode">
+              <button
+                type="button"
+                class="settings-section-toggle"
+                data-settings-toggle="mode"
+                aria-expanded="true"
+                aria-controls="settingsModePanel"
+              >
+                <span class="settings-section-heading">
+                  <span class="settings-section-label">Callsign Mode</span>
+                  <strong id="modeSectionValue">Transport + GA</strong>
+                </span>
+                <span id="modeSectionSummary" class="settings-section-summary">
+                  Airline IATA + digits, or aircraft type + suffix.
+                </span>
+              </button>
+
+              <div id="settingsModePanel" class="settings-section-panel">
+                <div class="settings-option-grid">
+                  {PRACTICE_MODES.map((mode) => (
+                    <button type="button" class="settings-option-card" data-mode-option={mode.id}>
+                      <span class="settings-option-label">{mode.label}</span>
+                      <span class="settings-option-detail">{mode.summary}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            <section class="settings-section" data-settings-section="voice">
+              <button
+                type="button"
+                class="settings-section-toggle"
+                data-settings-toggle="voice"
+                aria-expanded="false"
+                aria-controls="settingsVoicePanel"
+              >
+                <span class="settings-section-heading">
+                  <span class="settings-section-label">Voice</span>
+                  <strong id="voiceSectionValue">Mixed English</strong>
+                </span>
+                <span id="voiceSectionSummary" class="settings-section-summary">1.20x / Radio tone on</span>
+              </button>
+
+              <div id="settingsVoicePanel" class="settings-section-panel" hidden>
+                <div class="settings-field-group">
+                  <div class="settings-field-label-row">
+                    <label class="settings-field-label">Accent</label>
+                    <span class="settings-field-note">Choose the English accent preset for synthesis.</span>
+                  </div>
+                  <div class="settings-option-grid compact-grid">
+                    {accentOptions.map((accent) => (
+                      <button type="button" class="settings-option-card compact-card" data-accent-option={accent.value}>
+                        <span class="settings-option-label">{accent.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <label class="settings-field">
+                  <span class="settings-field-label">Speaking rate</span>
+                  <input
+                    id="speakingRate"
+                    type="range"
+                    min="0.25"
+                    max="2"
+                    step="0.05"
+                    value={defaultSpeakingRate}
+                  />
+                  <span class="range-meta">
+                    <span>Google TTS range: 0.25x to 2.00x</span>
+                    <strong id="speakingRateValue">{defaultSpeakingRate.toFixed(2)}x</strong>
+                  </span>
+                </label>
+
+                <label class="settings-toggle-card">
+                  <input id="radioToneCheckbox" type="checkbox" checked />
+                  <span class="settings-toggle-copy">
+                    <strong>Radio tone</strong>
+                    <span>Simulate aviation radio tone after synthesis.</span>
+                  </span>
+                </label>
+              </div>
+            </section>
+
+            <section class="settings-section" data-settings-section="other">
+              <button
+                type="button"
+                class="settings-section-toggle"
+                data-settings-toggle="other"
+                aria-expanded="false"
+                aria-controls="settingsOtherPanel"
+              >
+                <span class="settings-section-heading">
+                  <span class="settings-section-label">Other</span>
+                  <strong id="otherSectionValue">Feedback On</strong>
+                </span>
+                <span id="otherSectionSummary" class="settings-section-summary">Sound on / Vibration on</span>
+              </button>
+
+              <div id="settingsOtherPanel" class="settings-section-panel" hidden>
+                <div class="settings-toggle-grid">
+                  <label class="settings-toggle-card">
+                    <input id="soundCheckbox" type="checkbox" checked />
+                    <span class="settings-toggle-copy">
+                      <strong>UI sound feedback</strong>
+                      <span>Play lightweight success, error, and milestone sounds.</span>
+                    </span>
+                  </label>
+
+                  <label class="settings-toggle-card">
+                    <input id="vibrationCheckbox" type="checkbox" checked />
+                    <span class="settings-toggle-copy">
+                      <strong>Vibration feedback</strong>
+                      <span>Use device vibration on supported hardware.</span>
+                    </span>
+                  </label>
+                </div>
+              </div>
+            </section>
+
+            <section class="settings-section" data-settings-section="customLetters">
+              <button
+                type="button"
+                class="settings-section-toggle"
+                data-settings-toggle="customLetters"
+                aria-expanded="false"
+                aria-controls="settingsCustomLettersPanel"
+              >
+                <span class="settings-section-heading">
+                  <span class="settings-section-label">Custom Letters</span>
+                  <strong id="customLettersSectionValue">A-Z / 4 letters</strong>
+                </span>
+                <span id="customLettersSectionSummary" class="settings-section-summary">
+                  Tune the pool and output length for letter-based callsigns.
+                </span>
+              </button>
+
+              <div id="settingsCustomLettersPanel" class="settings-section-panel" hidden>
+                <label class="settings-field">
+                  <span class="settings-field-label">Custom letters</span>
+                  <input id="customLetters" type="text" maxlength="26" placeholder="Example: ABCXYZ" />
+                  <span class="supporting-text">Enter a custom letter pool. Duplicate and invalid characters are removed.</span>
+                </label>
+
+                <label class="settings-field">
+                  <span class="settings-field-label">Letter length</span>
+                  <input id="letterLength" type="number" min="2" max="8" value="4" />
+                  <span class="supporting-text">Used by Custom Letters mode.</span>
+                </label>
+              </div>
+            </section>
+          </div>
+        </div>
+      </dialog>
+
+      <div id="toastHost" class="toast-stack" aria-live="polite" aria-atomic="true"></div>
+      <audio id="audioPlayer" preload="none" hidden></audio>
+    </main>
+
+    <script>
+      import {
+        buildAnswerChoices,
+        buildCallsignSample,
+        normalizeCustomLetterSet
+      } from "../lib/callsign.js";
+      import { clearTtsAudioCache, fetchTtsAudioUrl } from "../lib/tts-client.js";
+      import {
+        applyAnswerResult,
+        buildSessionSummary,
+        createPracticeSession,
+        isSessionComplete
+      } from "../lib/practice-session.js";
+      import {
+        QUESTION_STATES,
+        canSubmitAnswer,
+        getChoiceState,
+        isMultipleChoiceMode,
+        resolveRoundAnswer
+      } from "../lib/answer-flow.js";
+      import { getProgressMilestoneMessage, getStreakMilestoneMessage } from "../lib/ui-feedback.js";
+      import { fadeOut, pop, shake, slideIn } from "../lib/ui-animations.js";
+      import {
+        createUiAudioController,
+        getUiAudioContext,
+        resetUiAudioContext,
+        supportsUiAudio,
+        supportsUiVibration
+      } from "../lib/ui-audio.js";
+
+      const practiceModeSelect = document.querySelector("#practiceMode");
+      const answerModeSelect = document.querySelector("#answerMode");
+      const accentSelect = document.querySelector("#accentSelect");
+      const customLettersInput = document.querySelector("#customLetters");
+      const letterLengthInput = document.querySelector("#letterLength");
+      const speakingRateInput = document.querySelector("#speakingRate");
+      const speakingRateValue = document.querySelector("#speakingRateValue");
+      const radioToneCheckbox = document.querySelector("#radioToneCheckbox");
+      const soundCheckbox = document.querySelector("#soundCheckbox");
+      const vibrationCheckbox = document.querySelector("#vibrationCheckbox");
+      const roundCard = document.querySelector("#roundCard");
+      const roundChipValue = document.querySelector("#roundChipValue");
+      const statusEyebrow = document.querySelector("#statusEyebrow");
+      const instructionOutput = document.querySelector("#instructionOutput");
+      const statusOutput = document.querySelector("#statusOutput");
+      const primaryActionButton = document.querySelector("#primaryActionButton");
+      const replayButton = document.querySelector("#replayButton");
+      const customLettersShortcut = document.querySelector("#customLettersShortcut");
+      const revealButton = document.querySelector("#revealButton");
+      const answerOutput = document.querySelector("#answerOutput");
+      const answerMeta = document.querySelector("#answerMeta");
+      const phraseOutput = document.querySelector("#phraseOutput");
+      const submittedOutput = document.querySelector("#submittedOutput");
+      const answerPanel = document.querySelector("#answerPanel");
+      const answerHeading = document.querySelector("#answerHeading");
+      const answerModeShell = document.querySelector("#answerModeShell");
+      const answerInput = document.querySelector("#answerInput");
+      const typedSection = document.querySelector("#typedSection");
+      const choiceSection = document.querySelector("#choiceSection");
+      const choiceButtons = document.querySelector("#choiceButtons");
+      const sessionSummaryPanel = document.querySelector("#sessionSummaryPanel");
+      const summaryCompleted = document.querySelector("#summaryCompleted");
+      const summaryAccuracy = document.querySelector("#summaryAccuracy");
+      const summaryBestStreak = document.querySelector("#summaryBestStreak");
+      const summaryEncouragement = document.querySelector("#summaryEncouragement");
+      const toastHost = document.querySelector("#toastHost");
+      const audioPlayer = document.querySelector("#audioPlayer");
+      const modeLaunchValue = document.querySelector("#modeLaunchValue");
+      const modeLaunchMeta = document.querySelector("#modeLaunchMeta");
+      const voiceLaunchValue = document.querySelector("#voiceLaunchValue");
+      const voiceLaunchMeta = document.querySelector("#voiceLaunchMeta");
+      const modeSectionValue = document.querySelector("#modeSectionValue");
+      const modeSectionSummary = document.querySelector("#modeSectionSummary");
+      const voiceSectionValue = document.querySelector("#voiceSectionValue");
+      const voiceSectionSummary = document.querySelector("#voiceSectionSummary");
+      const otherSectionValue = document.querySelector("#otherSectionValue");
+      const otherSectionSummary = document.querySelector("#otherSectionSummary");
+      const customLettersSectionValue = document.querySelector("#customLettersSectionValue");
+      const customLettersSectionSummary = document.querySelector("#customLettersSectionSummary");
+      const settingsModal = document.querySelector("#settingsModal");
+      const signalCanvas = document.querySelector("#signalCanvas");
+      const signalCanvasContext = signalCanvas?.getContext("2d");
+      let waveformAnalyser = null;
+      let waveformSourceNode = null;
+      let waveformAnimationFrame = null;
+      let waveformUsesMediaElementSource = false;
+      const settingsCloseButton = document.querySelector("#settingsCloseButton");
+      const settingsLaunchButtons = Array.from(document.querySelectorAll("[data-settings-launch]"));
+      const settingsSectionElements = Array.from(document.querySelectorAll("[data-settings-section]"));
+      const settingsSectionToggles = Array.from(document.querySelectorAll("[data-settings-toggle]"));
+      const modeOptionButtons = Array.from(document.querySelectorAll("[data-mode-option]"));
+      const accentOptionButtons = Array.from(document.querySelectorAll("[data-accent-option]"));
+      const answerModeButtons = Array.from(document.querySelectorAll("[data-answer-mode-option]"));
+
+      let sessionState = createPracticeSession({ targetCount: 10 });
+      let currentSample = null;
+      let currentChoices = [];
+      let currentResolution = null;
+      let questionState = QUESTION_STATES.IDLE;
+      let answerRevealed = false;
+      let selectedChoiceValue = "";
+      let transientFeedback = null;
+      let primaryActionPending = false;
+      let expandedSettingsSection = "mode";
+
+      function resizeSignalCanvas() {
+        if (!signalCanvas || !signalCanvasContext) {
+          return;
+        }
+
+        const rect = signalCanvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        const width = Math.max(1, Math.floor(rect.width * dpr));
+        const height = Math.max(1, Math.floor(rect.height * dpr));
+
+        if (signalCanvas.width !== width || signalCanvas.height !== height) {
+          signalCanvas.width = width;
+          signalCanvas.height = height;
+        }
+
+        signalCanvasContext.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function stopWaveformMonitoring() {
+        if (waveformAnimationFrame !== null) {
+          window.cancelAnimationFrame(waveformAnimationFrame);
+          waveformAnimationFrame = null;
+        }
+
+        if (signalCanvasContext && signalCanvas) {
+          signalCanvasContext.clearRect(0, 0, signalCanvas.width, signalCanvas.height);
+        }
+      }
+
+      function drawSignalWaveform() {
+        if (!signalCanvas || !signalCanvasContext || !waveformAnalyser) {
+          stopWaveformMonitoring();
+          return;
+        }
+
+        const rect = signalCanvas.getBoundingClientRect();
+        const width = rect.width;
+        const height = rect.height;
+        const bufferLength = waveformAnalyser.fftSize;
+        const data = new Uint8Array(bufferLength);
+
+        waveformAnalyser.getByteTimeDomainData(data);
+
+        signalCanvasContext.clearRect(0, 0, width, height);
+        signalCanvasContext.fillStyle = "rgba(7, 18, 34, 0.30)";
+        signalCanvasContext.fillRect(0, 0, width, height);
+        signalCanvasContext.lineWidth = 2;
+        signalCanvasContext.strokeStyle = "rgba(255, 255, 255, 0.95)";
+        signalCanvasContext.beginPath();
+
+        const sliceWidth = width / bufferLength;
+        let x = 0;
+
+        for (let i = 0; i < bufferLength; i += 1) {
+          const v = data[i] / 128.0;
+          const y = (v * height) / 2;
+
+          if (i === 0) {
+            signalCanvasContext.moveTo(x, y);
+          } else {
+            signalCanvasContext.lineTo(x, y);
+          }
+
+          x += sliceWidth;
+        }
+
+        signalCanvasContext.stroke();
+        waveformAnimationFrame = window.requestAnimationFrame(drawSignalWaveform);
+      }
+
+      function createWaveformAnalyzer() {
+        if (waveformAnalyser || !signalCanvas) {
+          return waveformAnalyser;
+        }
+
+        const context = getUiAudioContext();
+        if (!context) {
+          return null;
+        }
+
+        const analyser = context.createAnalyser();
+        analyser.fftSize = 2048;
+        analyser.smoothingTimeConstant = 0.8;
+
+        const stream = audioPlayer.captureStream?.();
+
+        if (stream && stream.getAudioTracks().length > 0) {
+          const source = context.createMediaStreamSource(stream);
+          source.connect(analyser);
+        } else {
+          try {
+            waveformSourceNode = context.createMediaElementSource(audioPlayer);
+            waveformSourceNode.connect(analyser);
+            analyser.connect(context.destination);
+            waveformUsesMediaElementSource = true;
+          } catch {
+            return null;
+          }
+        }
+
+        waveformAnalyser = analyser;
+        return waveformAnalyser;
+      }
+
+      function startWaveformMonitoring() {
+        if (!signalCanvas || !signalCanvasContext) {
+          return;
+        }
+
+        resizeSignalCanvas();
+        const analyzer = createWaveformAnalyzer();
+
+        if (!analyzer) {
+          return;
+        }
+
+        if (waveformAnimationFrame === null) {
+          drawSignalWaveform();
+        }
+      }
+
+      window.addEventListener("resize", resizeSignalCanvas);
+
+      const uiAudioController = createUiAudioController({
+        soundEnabled: soundCheckbox.checked,
+        vibrationEnabled: vibrationCheckbox.checked
+      });
+
+      function waitForNextFrame() {
+        return new Promise((resolve) => window.requestAnimationFrame(() => resolve()));
+      }
+
+      function cleanCustomLettersInput(value) {
+        return Array.from(
+          new Set(
+            String(value ?? "")
+              .toUpperCase()
+              .replace(/[^A-Z]/g, "")
+              .split("")
+          )
+        ).join("");
+      }
+
+      function cleanTypedAnswer(value) {
+        return String(value ?? "")
+          .toUpperCase()
+          .replace(/[^A-Z0-9 -]/g, "");
+      }
+
+      function normalizeSpeakingRate(value) {
+        const parsed = Number(value);
+
+        if (!Number.isFinite(parsed)) {
+          return 1.2;
+        }
+
+        return Math.min(2, Math.max(0.25, parsed));
+      }
+
+      function getSelectedModeLabel() {
+        return practiceModeSelect.options[practiceModeSelect.selectedIndex]?.textContent ?? "Transport + GA";
+      }
+
+      function getSelectedModeInstruction() {
+        return practiceModeSelect.options[practiceModeSelect.selectedIndex]?.dataset.detail ?? "";
+      }
+
+      function getSelectedModeDisplayValue() {
+        const modeDisplayMap = {
+          mixed: "Transport / GA",
+          transport: "Transport",
+          generalAviation: "GA",
+          numeric: "Numeric",
+          letters: "Letters"
+        };
+
+        return modeDisplayMap[practiceModeSelect.value] ?? getSelectedModeLabel();
+      }
+
+      function getSelectedModeMetaLabel() {
+        const modeMetaMap = {
+          mixed: "Airline / Aircraft + digits",
+          transport: "Airline IATA + digits",
+          generalAviation: "Aircraft type + suffix",
+          numeric: "Digits only",
+          letters: "Custom letter group"
+        };
+
+        return modeMetaMap[practiceModeSelect.value] ?? getSelectedModeInstruction();
+      }
+
+      function getSelectedModeGuidance() {
+        return getSelectedModeMetaLabel();
+      }
+
+      function getSelectedAccentLabel() {
+        return accentSelect.options[accentSelect.selectedIndex]?.textContent ?? "Mixed English";
+      }
+
+      function getAcceptedInputCopy(sample) {
+        if (!sample) {
+          return "";
+        }
+
+        return sample.mode === "transport"
+          ? `Accepted: ${sample.answer} or ${sample.callsign}`
+          : sample.answer !== sample.callsign
+            ? `Expected answer: ${sample.answer}`
+            : sample.instruction;
+      }
+
+      function getPendingSubmissionValue() {
+        const value = isMultipleChoiceMode(answerModeSelect.value) ? selectedChoiceValue : answerInput.value;
+        return String(value ?? "").trim();
+      }
+
+      function getPlaybackOptions() {
+        return {
+          accent: accentSelect.value,
+          speakingRate: normalizeSpeakingRate(speakingRateInput.value),
+          radioTone: radioToneCheckbox.checked
+        };
+      }
+
+      function getVoiceMetaLabel() {
+        const options = getPlaybackOptions();
+        return `${options.speakingRate.toFixed(2)}x / ${options.radioTone ? "Radio on" : "Clean"}`;
+      }
+
+      function getOtherPrimaryLabel() {
+        return soundCheckbox.checked || vibrationCheckbox.checked ? "Feedback On" : "Feedback Off";
+      }
+
+      function getOtherMetaLabel() {
+        return `Sound ${soundCheckbox.checked ? "on" : "off"} / Vibration ${vibrationCheckbox.checked ? "on" : "off"}`;
+      }
+
+      function getCustomLettersPrimaryLabel() {
+        const customLetters = cleanCustomLettersInput(customLettersInput.value) || "A-Z";
+        const letterLength = Number(letterLengthInput.value) || 4;
+        return `${customLetters} / ${letterLength} letters`;
+      }
+
+      function getCustomLettersSummaryLabel() {
+        const mode = practiceModeSelect.value;
+
+        if (mode === "letters") {
+          return "Active for the current Custom Letters round setup.";
+        }
+
+        if (mode === "generalAviation") {
+          return "Also used by letter-based General Aviation suffix generation.";
+        }
+
+        if (mode === "mixed") {
+          return "Used whenever the mixed mode generates a General Aviation callsign.";
+        }
+
+        return "Tune the pool and output length for letter-based callsigns.";
+      }
+
+      function getGenerationOptions() {
+        const customLetters = cleanCustomLettersInput(customLettersInput.value);
+
+        return {
+          mode: practiceModeSelect.value,
+          customLetters,
+          letterLength: Number(letterLengthInput.value) || 4
+        };
+      }
+
+      function getCanSubmitCurrentAnswer() {
+        return canSubmitAnswer(answerModeSelect.value, answerInput.value, selectedChoiceValue);
+      }
+
+      function getPrimaryActionLabel() {
+        if (questionState === QUESTION_STATES.IDLE) {
+          return "Play Callsign";
+        }
+
+        if (questionState === QUESTION_STATES.PREPARING) {
+          return "Preparing transmission...";
+        }
+
+        if (questionState === QUESTION_STATES.LISTENING) {
+          return "Listening...";
+        }
+
+        if (questionState === QUESTION_STATES.CHECKING) {
+          return "Checking...";
+        }
+
+        if (questionState === QUESTION_STATES.RESOLVED) {
+          return "Next Callsign";
+        }
+
+        if (questionState === QUESTION_STATES.SESSION_COMPLETE) {
+          return "Start Another Round";
+        }
+
+        if (isMultipleChoiceMode(answerModeSelect.value)) {
+          return getCanSubmitCurrentAnswer() ? "Check" : "Choose an Option";
+        }
+
+        return getCanSubmitCurrentAnswer() ? "Check" : "Type to Check";
+      }
+
+      function getRoundCardTone() {
+        if (transientFeedback?.tone) return transientFeedback.tone;
+        if (currentResolution) return currentResolution.isCorrect ? "success" : "error";
+        if (questionState === QUESTION_STATES.SESSION_COMPLETE) return "complete";
+        if (questionState === QUESTION_STATES.CHECKING) return "warning";
+        if (questionState === QUESTION_STATES.LISTENING) return "listening";
+        return "neutral";
+      }
+
+      function getStatusEyebrowText() {
+        if (transientFeedback?.eyebrow) return transientFeedback.eyebrow;
+        if (currentResolution) return currentResolution.isCorrect ? "Correct" : "Not quite";
+        if (answerRevealed && currentSample) return "Answer revealed";
+        if (questionState === QUESTION_STATES.PREPARING) return "Preparing";
+        if (questionState === QUESTION_STATES.LISTENING) return "Listening";
+        if (questionState === QUESTION_STATES.CHECKING) return "Checking";
+        if (questionState === QUESTION_STATES.SESSION_COMPLETE) return "Session complete";
+        if (currentSample) return "Your turn";
+        return "Ready";
+      }
+
+      function getInstructionHeading() {
+        if (transientFeedback?.headline) return transientFeedback.headline;
+        if (currentResolution) return currentResolution.isCorrect ? "Copied correctly" : "Review the correct callsign";
+        if (answerRevealed && currentSample) return "Review the callsign";
+        if (questionState === QUESTION_STATES.PREPARING) return "Preparing the next callsign";
+        if (questionState === QUESTION_STATES.LISTENING) return "Listen to the callsign";
+        if (questionState === QUESTION_STATES.CHECKING) return "Checking your answer";
+        if (questionState === QUESTION_STATES.SESSION_COMPLETE) return "Session complete";
+        if (currentSample) return currentSample.instruction;
+        return "Ready for your first callsign?";
+      }
+
+      function getRoundStatusCopy() {
+        if (transientFeedback?.detail) {
+          return transientFeedback.detail;
+        }
+
+        if (questionState === QUESTION_STATES.PREPARING) {
+          return "Generating audio and loading playback.";
+        }
+
+        if (questionState === QUESTION_STATES.LISTENING) {
+          return "";
+        }
+
+        if (questionState === QUESTION_STATES.CHECKING) {
+          return "";
+        }
+
+        if (currentResolution) {
+          return "";
+        }
+
+        if (answerRevealed && currentSample) {
+          return "";
+        }
+
+        if (questionState === QUESTION_STATES.SESSION_COMPLETE) {
+          return `${sessionState.completedCount} complete. Accuracy ${sessionState.accuracy}%. Best streak ${sessionState.bestStreak}.`;
+        }
+
+        if (currentSample) {
+          return isMultipleChoiceMode(answerModeSelect.value)
+            ? "Choose the closest match to check instantly."
+            : "Type the answer and press Check.";
+        }
+
+        return "Start when you are ready.";
+      }
+
+      function getAnswerHeading() {
+        if (questionState === QUESTION_STATES.SESSION_COMPLETE) {
+          return "Round complete";
+        }
+
+        return isMultipleChoiceMode(answerModeSelect.value) ? "Choose the closest match." : "Type what you heard.";
+      }
+
+      function getAnswerStateAttribute() {
+        if (
+          questionState === QUESTION_STATES.PREPARING ||
+          questionState === QUESTION_STATES.LISTENING ||
+          questionState === QUESTION_STATES.CHECKING ||
+          questionState === QUESTION_STATES.SESSION_COMPLETE
+        ) {
+          return "locked";
+        }
+
+        if (currentResolution?.isCorrect) return "correct";
+        if (currentResolution) return "incorrect";
+        return "idle";
+      }
+
+      function showToast(message, tone = "neutral") {
+        if (!message) {
+          return;
+        }
+
+        const toast = document.createElement("div");
+        toast.className = "toast";
+        toast.dataset.tone = tone;
+        toast.textContent = message;
+        toastHost.append(toast);
+        slideIn(toast);
+
+        window.setTimeout(() => {
+          fadeOut(toast, { duration: 180 });
+          window.setTimeout(() => {
+            toast.remove();
+          }, 220);
+        }, 2600);
+      }
+
+      function focusAnswerArea() {
+        if (questionState !== QUESTION_STATES.ANSWERING || !currentSample) {
+          return;
+        }
+
+        if (isMultipleChoiceMode(answerModeSelect.value)) {
+          const selectedChoice = choiceButtons.querySelector('[aria-pressed="true"]');
+          const firstChoice = choiceButtons.querySelector("button:not(:disabled)");
+          (selectedChoice ?? firstChoice)?.focus();
+          return;
+        }
+
+        answerInput.focus();
+        answerInput.select();
+      }
+
+      function clearTransientFeedback() {
+        transientFeedback = null;
+      }
+
+      function setTransientFeedback(headline, detail, tone = "neutral", eyebrow = headline) {
+        transientFeedback = {
+          tone,
+          eyebrow,
+          headline,
+          detail
+        };
+      }
+
+      function applySelectValue(selectElement, value) {
+        if (!selectElement || selectElement.value === value) {
+          return;
+        }
+
+        selectElement.value = value;
+        selectElement.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+
+      function setExpandedSettingsSection(sectionId) {
+        expandedSettingsSection = sectionId ?? "";
+
+        for (const sectionElement of settingsSectionElements) {
+          const sectionName = sectionElement.dataset.settingsSection;
+          const isOpen = sectionName === expandedSettingsSection;
+          const toggleButton = sectionElement.querySelector("[data-settings-toggle]");
+          const panel = sectionElement.querySelector(".settings-section-panel");
+
+          sectionElement.dataset.open = String(isOpen);
+          toggleButton?.setAttribute("aria-expanded", String(isOpen));
+
+          if (panel) {
+            panel.hidden = !isOpen;
+          }
+        }
+      }
+
+      function openSettingsModal(sectionId = "mode") {
+        setExpandedSettingsSection(sectionId);
+
+        if (!settingsModal.open) {
+          settingsModal.showModal();
+        }
+
+        window.requestAnimationFrame(() => {
+          document.querySelector(`[data-settings-toggle="${sectionId}"]`)?.focus();
+        });
+      }
+
+      function closeSettingsModal() {
+        if (settingsModal.open) {
+          settingsModal.close();
+        }
+      }
+
+      function renderSpeakingRateOutput() {
+        const speakingRate = normalizeSpeakingRate(speakingRateInput.value);
+        speakingRateValue.textContent = `${speakingRate.toFixed(2)}x`;
+      }
+
+      function renderOptionSelections() {
+        for (const button of modeOptionButtons) {
+          const isSelected = button.dataset.modeOption === practiceModeSelect.value;
+          button.dataset.selected = String(isSelected);
+          button.setAttribute("aria-pressed", String(isSelected));
+        }
+
+        for (const button of accentOptionButtons) {
+          const isSelected = button.dataset.accentOption === accentSelect.value;
+          button.dataset.selected = String(isSelected);
+          button.setAttribute("aria-pressed", String(isSelected));
+        }
+
+        for (const button of answerModeButtons) {
+          const isSelected = button.dataset.answerModeOption === answerModeSelect.value;
+          button.dataset.selected = String(isSelected);
+          button.setAttribute("aria-pressed", String(isSelected));
+          button.disabled = questionState === QUESTION_STATES.CHECKING;
+        }
+      }
+
+      function renderSettingsEntryCards() {
+        modeLaunchValue.textContent = getSelectedModeDisplayValue();
+        modeLaunchMeta.textContent = getSelectedModeGuidance();
+        voiceLaunchValue.textContent = getSelectedAccentLabel();
+        voiceLaunchMeta.textContent = getVoiceMetaLabel();
+      }
+
+      function renderSettingsSectionSummaries() {
+        modeSectionValue.textContent = getSelectedModeLabel();
+        modeSectionSummary.textContent = getSelectedModeInstruction();
+        voiceSectionValue.textContent = getSelectedAccentLabel();
+        voiceSectionSummary.textContent = getVoiceMetaLabel();
+        otherSectionValue.textContent = getOtherPrimaryLabel();
+        otherSectionSummary.textContent = getOtherMetaLabel();
+        customLettersSectionValue.textContent = getCustomLettersPrimaryLabel();
+        customLettersSectionSummary.textContent = getCustomLettersSummaryLabel();
+      }
+
+      function renderControlState() {
+        const mode = practiceModeSelect.value;
+        const usesCustomLetters = mode === "mixed" || mode === "generalAviation" || mode === "letters";
+        const usesLetterLength = mode === "letters";
+        const soundSupported = supportsUiAudio();
+        const vibrationSupported = supportsUiVibration();
+
+        customLettersInput.disabled = !usesCustomLetters;
+        letterLengthInput.disabled = !usesLetterLength;
+        customLettersShortcut.hidden = mode !== "letters";
+        soundCheckbox.disabled = !soundSupported;
+        vibrationCheckbox.disabled = !vibrationSupported;
+
+        if (!soundSupported) {
+          soundCheckbox.checked = false;
+          uiAudioController.setSoundEnabled(false);
+        }
+
+        if (!vibrationSupported) {
+          vibrationCheckbox.checked = false;
+          uiAudioController.setVibrationEnabled(false);
+        }
+      }
+
+      function renderAnswerReveal() {
+        const canRevealBeforeAnswer = Boolean(currentSample) && !currentResolution;
+        const isShowingAnswerDetails = Boolean(currentSample) && (answerRevealed || Boolean(currentResolution));
+        revealButton.hidden = !canRevealBeforeAnswer;
+        revealButton.disabled = !canRevealBeforeAnswer;
+        revealButton.textContent = answerRevealed ? "Hide Answer" : "Show Answer";
+
+        statusOutput.hidden = false;
+        answerOutput.hidden = true;
+        answerOutput.textContent = "";
+        answerMeta.hidden = true;
+        answerMeta.textContent = "";
+        phraseOutput.hidden = true;
+        phraseOutput.textContent = "";
+        submittedOutput.hidden = true;
+        submittedOutput.textContent = "";
+
+        if (!currentSample) {
+          return;
+        }
+
+        if (!isShowingAnswerDetails) {
+          return;
+        }
+
+        statusOutput.hidden = true;
+        answerOutput.hidden = false;
+        answerOutput.textContent = currentSample.callsign;
+        answerMeta.hidden = currentResolution?.isCorrect ?? false;
+        answerMeta.textContent = answerMeta.hidden ? "" : getAcceptedInputCopy(currentSample);
+        phraseOutput.hidden = false;
+        phraseOutput.textContent = `Pronunciation: ${currentSample.spokenPhrase}`;
+
+        const submittedValue = currentResolution?.submittedValue?.trim() ?? "";
+
+        if (currentResolution && !currentResolution.isCorrect && submittedValue) {
+          submittedOutput.hidden = false;
+          submittedOutput.textContent = `Your answer: ${submittedValue}`;
+        }
+      }
+
+      function renderChoices() {
+        choiceButtons.innerHTML = "";
+
+        if (!currentSample) {
+          return;
+        }
+
+        for (const choice of currentChoices) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "choice-card";
+          button.dataset.value = choice.value;
+          button.textContent = choice.displayValue ?? choice.value;
+
+          if (currentResolution) {
+            button.dataset.choiceState = getChoiceState(choice.value, currentResolution);
+          } else if (choice.value === selectedChoiceValue) {
+            button.dataset.choiceState = "selected";
+          } else {
+            button.dataset.choiceState = "idle";
+          }
+
+          button.setAttribute("aria-pressed", choice.value === selectedChoiceValue ? "true" : "false");
+          button.disabled = questionState !== QUESTION_STATES.ANSWERING || Boolean(currentResolution);
+          button.addEventListener("click", () => {
+            if (questionState !== QUESTION_STATES.ANSWERING || currentResolution) {
+              return;
+            }
+
+            clearTransientFeedback();
+            selectedChoiceValue = choice.value;
+            renderAnswerPanel();
+            renderPrimaryAction();
+            void submitCurrentAnswer();
+          });
+          choiceButtons.append(button);
+        }
+      }
+
+      function renderRoundCard() {
+        const roundStatusCopy = getRoundStatusCopy();
+        roundCard.dataset.questionState = questionState;
+        roundCard.dataset.tone = getRoundCardTone();
+        roundChipValue.textContent = `${Math.min(sessionState.completedCount + 1, sessionState.targetCount)} / ${sessionState.targetCount}`;
+        statusEyebrow.textContent = getStatusEyebrowText();
+        instructionOutput.textContent = getInstructionHeading();
+        statusOutput.hidden = !roundStatusCopy;
+        statusOutput.textContent = roundStatusCopy;
+      }
+
+      function renderAnswerPanel() {
+        answerPanel.dataset.answerMode = answerModeSelect.value;
+        answerHeading.textContent = getAnswerHeading();
+        answerModeShell.dataset.ready = String(getCanSubmitCurrentAnswer());
+        typedSection.hidden = isMultipleChoiceMode(answerModeSelect.value);
+        choiceSection.hidden = !isMultipleChoiceMode(answerModeSelect.value);
+        answerInput.disabled =
+          !currentSample ||
+          questionState === QUESTION_STATES.PREPARING ||
+          questionState === QUESTION_STATES.LISTENING ||
+          questionState === QUESTION_STATES.CHECKING ||
+          questionState === QUESTION_STATES.SESSION_COMPLETE ||
+          Boolean(currentResolution);
+        answerInput.dataset.answerState = getAnswerStateAttribute();
+
+        renderChoices();
+        renderOptionSelections();
+      }
+
+      function renderSummaryPanel() {
+        const showSummary = questionState === QUESTION_STATES.SESSION_COMPLETE;
+        sessionSummaryPanel.hidden = !showSummary;
+
+        if (!showSummary) {
+          return;
+        }
+
+        const summary = buildSessionSummary(sessionState, getSelectedModeLabel());
+        summaryCompleted.textContent = summary.completedLabel;
+        summaryAccuracy.textContent = summary.accuracyLabel;
+        summaryBestStreak.textContent = summary.streakLabel;
+        summaryEncouragement.textContent = summary.encouragement;
+      }
+
+      function renderPrimaryAction() {
+        primaryActionButton.textContent = getPrimaryActionLabel();
+        primaryActionButton.disabled =
+          primaryActionPending ||
+          questionState === QUESTION_STATES.PREPARING ||
+          questionState === QUESTION_STATES.LISTENING ||
+          questionState === QUESTION_STATES.CHECKING ||
+          (questionState === QUESTION_STATES.ANSWERING &&
+            (isMultipleChoiceMode(answerModeSelect.value) || !getCanSubmitCurrentAnswer()));
+
+        replayButton.disabled =
+          !currentSample ||
+          questionState === QUESTION_STATES.PREPARING ||
+          questionState === QUESTION_STATES.LISTENING ||
+          questionState === QUESTION_STATES.CHECKING;
+      }
+
+      function renderApp() {
+        renderSpeakingRateOutput();
+        renderControlState();
+        renderSettingsEntryCards();
+        renderSettingsSectionSummaries();
+        renderRoundCard();
+        renderAnswerReveal();
+        renderAnswerPanel();
+        renderSummaryPanel();
+        renderPrimaryAction();
+      }
+
+      function notifyMilestones(milestones) {
+        const streakHit = milestones.streak.at(0);
+        const progressHit = milestones.progress.at(0);
+
+        if (streakHit) {
+          showToast(getStreakMilestoneMessage(streakHit), "success");
+        }
+
+        if (progressHit) {
+          showToast(getProgressMilestoneMessage(progressHit), "neutral");
+        }
+
+        if (streakHit || progressHit) {
+          void uiAudioController.playFeedback("milestone");
+        }
+      }
+
+      async function playCurrentSample() {
+        if (!currentSample) {
+          return;
+        }
+
+        clearTransientFeedback();
+        questionState = QUESTION_STATES.LISTENING;
+        renderApp();
+
+        try {
+          const audioUrl = await fetchTtsAudioUrl(currentSample.spokenPhrase, getPlaybackOptions());
+          audioPlayer.pause();
+          audioPlayer.src = audioUrl;
+          audioPlayer.currentTime = 0;
+          await audioPlayer.play();
+        } catch (error) {
+          questionState = currentResolution
+            ? isSessionComplete(sessionState)
+              ? QUESTION_STATES.SESSION_COMPLETE
+              : QUESTION_STATES.RESOLVED
+            : QUESTION_STATES.ANSWERING;
+          setTransientFeedback(
+            "Audio issue",
+            error instanceof Error ? error.message : "Audio playback failed.",
+            "error"
+          );
+          renderApp();
+        }
+      }
+
+      async function startRound({ resetSession = false } = {}) {
+        if (resetSession) {
+          sessionState = createPracticeSession({ targetCount: 10 });
+        }
+
+        clearTransientFeedback();
+        answerRevealed = false;
+        currentResolution = null;
+        selectedChoiceValue = "";
+        answerInput.value = "";
+        audioPlayer.pause();
+        audioPlayer.currentTime = 0;
+        questionState = QUESTION_STATES.PREPARING;
+        renderApp();
+
+        try {
+          const generationOptions = getGenerationOptions();
+          currentSample = buildCallsignSample(generationOptions);
+          currentChoices = buildAnswerChoices(currentSample, {
+            count: 4,
+            customLetters: normalizeCustomLetterSet(generationOptions.customLetters)
+          });
+
+          renderApp();
+          slideIn(roundCard);
+          await uiAudioController.unlock();
+          await playCurrentSample();
+        } catch (error) {
+          questionState = QUESTION_STATES.IDLE;
+          currentSample = null;
+          currentChoices = [];
+          setTransientFeedback(
+            "Could not prepare the callsign",
+            error instanceof Error ? error.message : "Question generation failed.",
+            "error"
+          );
+          renderApp();
+        }
+      }
+
+      async function submitCurrentAnswer() {
+        if (!currentSample || questionState !== QUESTION_STATES.ANSWERING) {
+          return;
+        }
+
+        if (!getCanSubmitCurrentAnswer()) {
+          setTransientFeedback(
+            "Answer first",
+            isMultipleChoiceMode(answerModeSelect.value)
+              ? "Choose one option before checking."
+              : "Type an answer before checking.",
+            "warning"
+          );
+          renderApp();
+          return;
+        }
+
+        clearTransientFeedback();
+        questionState = QUESTION_STATES.CHECKING;
+        renderApp();
+        const submitFeedbackPromise = uiAudioController.play("submit");
+        await waitForNextFrame();
+
+        currentResolution = resolveRoundAnswer(currentSample, {
+          answerMode: answerModeSelect.value,
+          typedAnswer: answerInput.value,
+          selectedChoice: selectedChoiceValue
+        });
+
+        const result = applyAnswerResult(sessionState, currentResolution.isCorrect);
+        sessionState = result.session;
+        questionState = isSessionComplete(sessionState)
+          ? QUESTION_STATES.SESSION_COMPLETE
+          : QUESTION_STATES.RESOLVED;
+
+        renderApp();
+        await submitFeedbackPromise;
+
+        if (currentResolution.isCorrect) {
+          pop(roundCard);
+          await uiAudioController.playFeedback("correct");
+        } else {
+          shake(answerPanel);
+          shake(roundCard);
+          await uiAudioController.playFeedback("incorrect");
+        }
+
+        notifyMilestones(result.milestones);
+
+        if (questionState === QUESTION_STATES.SESSION_COMPLETE) {
+          slideIn(sessionSummaryPanel);
+        }
+
+        primaryActionButton.focus();
+      }
+
+      async function handlePrimaryAction() {
+        if (primaryActionPending) {
+          return;
+        }
+
+        primaryActionPending = true;
+        renderPrimaryAction();
+
+        try {
+          await uiAudioController.unlock();
+
+          if (questionState === QUESTION_STATES.IDLE) {
+            await startRound({ resetSession: true });
+            return;
+          }
+
+          if (questionState === QUESTION_STATES.ANSWERING) {
+            await submitCurrentAnswer();
+            return;
+          }
+
+          if (questionState === QUESTION_STATES.RESOLVED) {
+            await startRound();
+            return;
+          }
+
+          if (questionState === QUESTION_STATES.SESSION_COMPLETE) {
+            await startRound({ resetSession: true });
+          }
+        } finally {
+          primaryActionPending = false;
+          renderPrimaryAction();
+        }
+      }
+
+      practiceModeSelect.addEventListener("change", () => {
+        clearTransientFeedback();
+        renderApp();
+      });
+
+      answerModeSelect.addEventListener("change", () => {
+        clearTransientFeedback();
+        selectedChoiceValue = "";
+        renderApp();
+      });
+
+      accentSelect.addEventListener("change", () => {
+        renderApp();
+      });
+
+      customLettersInput.addEventListener("input", () => {
+        customLettersInput.value = cleanCustomLettersInput(customLettersInput.value);
+        renderApp();
+      });
+
+      letterLengthInput.addEventListener("change", () => {
+        const value = Number(letterLengthInput.value) || 4;
+        letterLengthInput.value = String(Math.min(8, Math.max(2, value)));
+        renderApp();
+      });
+
+      speakingRateInput.addEventListener("input", () => {
+        renderApp();
+      });
+
+      radioToneCheckbox.addEventListener("change", () => {
+        renderApp();
+      });
+
+      soundCheckbox.addEventListener("change", () => {
+        uiAudioController.setSoundEnabled(soundCheckbox.checked);
+        renderApp();
+      });
+
+      vibrationCheckbox.addEventListener("change", () => {
+        uiAudioController.setVibrationEnabled(vibrationCheckbox.checked);
+        renderApp();
+      });
+
+      for (const button of settingsLaunchButtons) {
+        button.addEventListener("click", () => {
+          openSettingsModal(button.dataset.settingsLaunch);
+        });
+      }
+
+      for (const toggleButton of settingsSectionToggles) {
+        toggleButton.addEventListener("click", () => {
+          const sectionName = toggleButton.dataset.settingsToggle;
+          setExpandedSettingsSection(expandedSettingsSection === sectionName ? "" : sectionName);
+        });
+      }
+
+      for (const button of modeOptionButtons) {
+        button.addEventListener("click", () => {
+          applySelectValue(practiceModeSelect, button.dataset.modeOption);
+        });
+      }
+
+      for (const button of accentOptionButtons) {
+        button.addEventListener("click", () => {
+          applySelectValue(accentSelect, button.dataset.accentOption);
+        });
+      }
+
+      for (const button of answerModeButtons) {
+        button.addEventListener("click", () => {
+          applySelectValue(answerModeSelect, button.dataset.answerModeOption);
+        });
+      }
+
+      settingsCloseButton.addEventListener("click", () => {
+        closeSettingsModal();
+      });
+
+      settingsModal.addEventListener("click", (event) => {
+        if (event.target === settingsModal) {
+          closeSettingsModal();
+        }
+      });
+
+      primaryActionButton.addEventListener("click", () => {
+        void handlePrimaryAction();
+      });
+
+      replayButton.addEventListener("click", () => {
+        void playCurrentSample();
+      });
+
+      revealButton.addEventListener("click", () => {
+        answerRevealed = !answerRevealed;
+        renderApp();
+      });
+
+      answerInput.addEventListener("input", () => {
+        clearTransientFeedback();
+        answerInput.value = cleanTypedAnswer(answerInput.value);
+        renderAnswerPanel();
+        renderPrimaryAction();
+      });
+
+      answerInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+
+          if (questionState === QUESTION_STATES.ANSWERING) {
+            void submitCurrentAnswer();
+          }
+        }
+      });
+
+      audioPlayer.addEventListener("play", () => {
+        startWaveformMonitoring();
+      });
+
+      audioPlayer.addEventListener("pause", () => {
+        if (!audioPlayer.ended) {
+          stopWaveformMonitoring();
+        }
+      });
+
+      audioPlayer.addEventListener("ended", () => {
+        stopWaveformMonitoring();
+
+        if (!currentSample) {
+          return;
+        }
+
+        questionState = currentResolution
+          ? isSessionComplete(sessionState)
+            ? QUESTION_STATES.SESSION_COMPLETE
+            : QUESTION_STATES.RESOLVED
+          : QUESTION_STATES.ANSWERING;
+        renderApp();
+        focusAnswerArea();
+      });
+
+      window.addEventListener("beforeunload", () => {
+        clearTtsAudioCache();
+        resetUiAudioContext();
+      });
+
+      setExpandedSettingsSection("mode");
+      resizeSignalCanvas();
+      renderApp();
+    </script>
+  </body>
+</html>

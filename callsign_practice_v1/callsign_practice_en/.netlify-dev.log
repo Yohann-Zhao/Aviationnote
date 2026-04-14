@@ -1,0 +1,51 @@
+
+> dev
+> netlify dev
+
+⬥ Injecting environment variable values for all scopes
+⬥ Injected .env file env vars: TTS_API_KEY, GOOGLE_TTS_LANGUAGE_CODE, GOOGLE_TTS_VOICE_NAME, GOOGLE_TTS_SPEAKING_RATE
+⬥ Setting up local dev server
+
+⬥ Starting framework dev server
+[33m⠋[39m Waiting for framework dev server to be ready on port 4321
+[1G
+> dev:astro
+> astro dev
+
+[33m⠙[39m Waiting for framework dev server to be ready on port 4321
+[1G[vite] connected.
+[33m⠹[39m Waiting for framework dev server to be ready on port 4321
+[1G20:21:53 [types] Generated 1ms
+[33m⠸[39m Waiting for framework dev server to be ready on port 4321
+[1G20:21:53 [WARN] [content] Content config not loaded
+[33m⠼[39m Waiting for framework dev server to be ready on port 4321
+[1G20:21:53 [vite] Re-optimizing dependencies because vite config has changed
+[33m⠴[39m Waiting for framework dev server to be ready on port 4321
+[1G astro  v6.0.8 ready in 1557 ms
+┃ Local    http://localhost:4321/
+┃ Network  http://198.18.0.1:4321/
+           http://192.168.2.42:4321/
+           http://192.168.25.1:4321/
+           http://192.168.16.1:4321/
+[33m⠦[39m Waiting for framework dev server to be ready on port 4321
+[1G20:21:53 watching for file changes...
+[33m⠧[39m Waiting for framework dev server to be ready on port 4321
+[32m√[39m framework dev server ready on port 4321
+⬥ Loaded function tts
+
+   ╭─────────────────────── ⬥  ────────────────────────╮
+   │                                                   │
+   │   Local dev server ready: http://localhost:8888   │
+   │                                                   │
+   ╰───────────────────────────────────────────────────╯
+
+(node:7792) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+20:21:54 [200] / 21ms
+20:21:55 [vite] ✨ new dependencies optimized: astro/runtime/client/dev-toolbar/entrypoint.js
+20:21:55 [vite] ✨ optimized dependencies changed. reloading
+20:21:55 [200] / 3ms
+20:22:07 [200] / 2ms
+⬥ Rewrote URL to /.netlify/functions/tts
+Request from ::1: POST /.netlify/functions/tts
+Response with status 200 in 1311 ms.

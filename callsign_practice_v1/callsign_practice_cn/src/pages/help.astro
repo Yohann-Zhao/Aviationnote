@@ -1,0 +1,31 @@
+---
+import "../styles/tailwind.css";
+import GuideContent from "../content/help/getting-started_zh.md";
+import { HELP_PAGE_COPY } from "../lib/copy-zh.js";
+
+const pageTitle = HELP_PAGE_COPY.pageTitle;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+  </head>
+  <body>
+    <main class="practice-app help-page">
+      <header class="practice-header help-header">
+        <div class="help-header-copy">
+          <p class="eyebrow">{HELP_PAGE_COPY.eyebrow}</p>
+          <h1>{pageTitle}</h1>
+        </div>
+        <a class="header-pill-link" href="/">{HELP_PAGE_COPY.backLink}</a>
+      </header>
+
+      <article class="panel help-article">
+        <GuideContent />
+      </article>
+    </main>
+  </body>
+</html>

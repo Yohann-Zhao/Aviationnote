@@ -1,0 +1,30 @@
+---
+import "../styles/tailwind.css";
+import GuideContent from "../content/help/getting-started.md";
+
+const pageTitle = "How To Use Callsign Practice";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+  </head>
+  <body>
+    <main class="practice-app help-page">
+      <header class="practice-header help-header">
+        <div class="help-header-copy">
+          <p class="eyebrow">Guide</p>
+          <h1>{pageTitle}</h1>
+        </div>
+        <a class="header-pill-link" href="/">Back To Practice</a>
+      </header>
+
+      <article class="panel help-article">
+        <GuideContent />
+      </article>
+    </main>
+  </body>
+</html>

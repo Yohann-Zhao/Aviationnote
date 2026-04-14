@@ -97,6 +97,28 @@ export default defineConfig({
 						{ label: 'APU System', translations: { 'zh-CN': 'APU系统' }, badge: { text: 'In Progress', variant: 'caution' }, link: '/apu/apu_system' },
 					],
 				},
+				{
+					label: 'Electrical',
+					translations: {
+						'zh-CN': '电气系统',//这里要大写CN
+					},
+					items: [
+						{ label: 'Electrical System', translations: { 'zh-CN': '电气系统' }, badge: { text: 'In Progress', variant: 'caution' }, link: '/electrical/electrical_system' },
+						{ label: 'Electrical Operation', translations: { 'zh-CN': '电气操作' }, badge: { text: 'In Progress', variant: 'caution' }, link: '/electrical/electrical_operation' },
+						{ label: 'Electrical Failure Cases', translations: { 'zh-CN': '电气故障案例' }, badge: { text: 'In Progress', variant: 'caution' }, link: '/electrical/electrical_failure_cases' },
+					],
+				},
+				{
+					label: 'EFIS',
+					translations: {
+						'zh-CN': '电子飞行仪表系统',//这里要大写CN
+					},
+					items: [
+						{ label: 'EFIS System', translations: { 'zh-CN': '电子飞行仪表系统' }, badge: { text: 'In Progress', variant: 'caution' }, link: '/efis/efis_system' },
+						{ label: 'EFIS PFD', translations: { 'zh-CN': '主飞行显示' }, badge: { text: 'In Progress', variant: 'caution' }, link: '/efis/efis_pfd' },
+						{ label: 'EFIS ND', translations: { 'zh-CN': '导航显示' }, badge: { text: 'In Progress', variant: 'caution' }, link: '/efis/efis_nd' },
+					],
+				},
 			],
 		}),
 	],
