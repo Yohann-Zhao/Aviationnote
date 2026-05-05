@@ -22,8 +22,7 @@ The main colors used are:
 During the course, you will become familiar with the use of this
 color coding.
 
-Let's start with the last 3, green, amber, and red, which are the
-most important.
+Let's start with the last 3, green, amber, and red, which are the most important.
 
 ![alt text](image-22.png)
 
@@ -79,7 +78,7 @@ You will see later how these system pages are called either manually or automati
 
 ![alt text](image-31.png)
 
-An aircraft STATUS page may be displayed on the SD to check the state ofthe aircraft. A NORMAL message is displayed to indicate that the aircraft state is normal and that there are no inoperative systems.
+An aircraft STATUS page may be displayed on the SD to check the state of the aircraft. A NORMAL message is displayed to indicate that the aircraft state is normal and that there are no inoperative systems.
 
 Let's see what the STATUS page looks like when things are not normal, for example, following a system failure.
 
@@ -96,7 +95,7 @@ The area at the bottom of any SD contains permanent data:
 - Total Air Temperature (TAT)
 - Static Air Temperature (SAT)
 - Delta ISA (displayed only in flight, in STD baro reference mode)
-- Time and
+- Time
 - Gross Weight (GW).
 
 Note: A G LOAD factor indication wil be displayed above the time indication if t has exceeded a G limit after engine take off application.
@@ -114,9 +113,9 @@ The ECAM system divides the various stages of a flight into phases, from initial
 
 ![alt text](image-37.png)
 
-We will now look at the different ways that the ECAM system advises you when things are not going exactly right. We will startwith a minor advice indication and work up to a major fault,concentrating on the two ECAM screens.
+We will now look at the different ways that the ECAM system advises you when things are not going exactly right. We will start with a minor advice indication and work up to a major fault,concentrating on the two ECAM screens.
 
-If a system parameter, for example an engine vibration level,approaches a limit, the ECAM system will advise you of this by displaying, automatically, the relevant system page on the SD. On this system page the affected parameter will pulse. Notice that at this stage, the parameter is still shown in green since it is still within normal limits. This is known as an ECAM advisory and you should refer to the QRH in order to find the related recommended action to do. Now let's look at what happens when ECAM detects a minor system failure.
+If a system parameter, for example an engine vibration level, approaches a limit, the ECAM system will advise you of this by displaying, automatically, the relevant system page on the SD. On this system page the affected parameter will pulse. Notice that at this stage, the parameter is still shown in green since it is still within normal limits. This is known as an ECAM advisory and you should refer to the QRH in order to find the related recommended action to do. Now let's look at what happens when ECAM detects a minor system failure.
 ![alt text](image-38.png)
 
 When a failure occurs, leading to a loss of redundancy or loss of a system that does not affect the safety of the flight, for example DFDR FAULT, the ECAM system will inform you by displaying an amber caution message on the E/WD. This type of failure is
@@ -160,7 +159,7 @@ We will concentrate on the use of the ECAM system, how it alerts you, and how it
 
 As the hydraulic indications themselves will be covered in the appropriate modules.
 
-When a serious fault occurs, the ECAM system alerts the crew aurally and visually. In the studied fault, a single chime will sound,and the master caution lights will come on. To cancel the master caution lights, and reset the alerting system, one of the MASTER
+When a serious fault occurs, the ECAM system alerts the crew aurally and visually. In the studied fault, a single chime will sound, and the master caution lights will come on. To cancel the master caution lights, and reset the alerting system, one of the MASTER
 CAUT pushbuttons must be pressed
 
 ![alt text](image-45.png)
@@ -303,7 +302,7 @@ When the ENG MASTER 1 switch is set to OFF, the ENG 1 SHUTDOWN caution is shown 
 
 Notice that the amber caution procedure has appeared below the red one. This happens because the red (LEVEL 3) warning message has priority over this amber (LEVEL 2) caution message, which in turn will have priority over an amber (LEVEL 1) caution message.
 
-Note: if several messages belong to the same LEVEL, the more critical message will be onthe top of the list.
+Note: if several messages belong to the same LEVEL, the more critical message will be on the top of the list.
 
 ![alt text](image-71.png)
 
@@ -318,7 +317,7 @@ Here the ENG 1 FIRE pb must be PUSHed. We will do this for you.
 
 ![alt text](image-73.png)
 
-Notice that there is a white line in the abnormal procedure. Inorder to let the engine spool to slow down, there is a countdown before the next action. After this countdown, the white line is replaced by a blue action line.
+Notice that there is a white line in the abnormal procedure. In order to let the engine spool to slow down, there is a countdown before the next action. After this countdown, the white line is replaced by a blue action line.
 
 ![alt text](image-74.png)
 
@@ -345,13 +344,13 @@ Notice that:
 
 The remaining steps are similar to those seen for an ECAM CAUTION so we will stop here.
 
-You have seen that the ECAM system has provided a smart andinteractive procedure to help you to deal with a major problem.
+You have seen that the ECAM system has provided a smart and interactive procedure to help you to deal with a major problem.
 
 Note: As the nacelle temperature is back below the advisory threshold, so the engine page is replaced by the cruise page, because the caution message, displayed on top, is not linked to a system page on the SD.
 
 ![alt text](image-78.png)
 
-The warning or caution message displayed on the top line of the leftside of the E/WD is always the more critical even if another problem is detected.
+The warning or caution message displayed on the top line of the left side of the E/WD is always the more critical even if another problem is detected.
 Notice that the FWS FAULT is more critical than the CAB PRFAULT, but less than the ENGINE problem.
 
 ![alt text](image-79.png)
@@ -360,7 +359,7 @@ When there are not enough lines on the left side of the E/WD, the title which ca
 
 ![alt text](image-80.png)
 
-We do the actions for you. So, notice that, as soon as there are enough lines on the left side of the E/WD, the titles move from theright side to the left. 
+We do the actions for you. So, notice that, as soon as there are enough lines on the left side of the E/WD, the titles move from the right side to the left. 
 
 ![alt text](image-81.png)
 
@@ -372,7 +371,7 @@ When the last caution message has been displayed on the left side, the green arr
 
 After clearing the ENGINE caution message, the next caution moves up.
 
-Note: On the SD, the system page, if displayed, is always linked to the cautionunderlined and displayed on top of the left side of the E/WD
+Note: On the SD, the system page, if displayed, is always linked to the caution underlined and displayed on top of the left side of the E/WD
 
 After doing the related action, if any, this caution message will be cleared. For each caution message you have to wait for the PF confirmation in order to clear it.
 
@@ -431,7 +430,7 @@ Notice that, at any moment you can recall the warning and caution messages that 
 
 ---
 
-As an option, an OEB database lists the warnings and cautions relevant to an OEB. This database will be loaded into the FWCs via the MCDU.An OEB reminder function will provide the crew with an operational help, by clearly identifying any procedure or status messages which are affected by an OEB. So, the crew will be informed in real time, on the ECAM screens, if the related procedure or status is applicable or not.
+As an option, an OEB database lists the warnings and cautions relevant to an OEB. This database will be loaded into the FWCs via the MCDU. An OEB reminder function will provide the crew with an operational help, by clearly identifying any procedure or status messages which are affected by an OEB. So, the crew will be informed in real time, on the ECAM screens, if the related procedure or status is applicable or not.
 
 Note: The crew has to refer to the QRH, where the full OEB information is provided.
 
@@ -454,7 +453,7 @@ In this module we have discussed the ECAM system. You have seen the various fail
 
 Throughout the ground school course, and during your simulator sessions, you will have the opportunity to practice ECAM procedures.
 
-*** Module completed ***
+***Module completed***
 
 ## Video study
 

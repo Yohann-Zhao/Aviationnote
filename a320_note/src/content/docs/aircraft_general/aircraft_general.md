@@ -11,7 +11,7 @@ The A320 is the most advanced single-aisle aircraft in service today, with fly-b
 
 With a Maximum Take-Off Weight (MTOW) of 77 T, the range of the A320 is around 3000 nm, as shown on the different maps.
 
-Note: the A320 generic(一般的，通用的) MTOW is 75.5 T.
+Note: the A320 generic MTOW is 75.5 T.
 
 Optionally, the A320 family can be now equipped with sharklets allowing the performances to be improved by around 3.5%, so the range may be increased by around 100 nm, or the payload may be increased by around 500 kg (or 1100 lbs).
 

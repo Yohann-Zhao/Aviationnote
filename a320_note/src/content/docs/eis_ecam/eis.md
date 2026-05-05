@@ -40,7 +40,7 @@ The upper ECAM display is called the Engine Warning Display (E/WD).
 
 The lower ECAM display is called the System Display (SD).
 
-Various aircraft system parameters can be viewed on these screens. As anexample, you can see a sequence of all SD pages (one after the other).
+Various aircraft system parameters can be viewed on these screens. As an example, you can see a sequence of all SD pages (one after the other).
 
 ![alt text](image-4.png)
 
@@ -64,8 +64,10 @@ For the majority of the push button switches, installed on the overhead panel, a
 On the overhead panel, some push button switches are used on a temporary basis, or may have an indication of their state.
 
 The logic is:
-    - Temporary selection for operational reasons - blue ON light (e.g. anti-ice)
-    - Applicable system status - green light (e.g. APU available).
+- Temporary selection for operational reasons
+    - blue ON light (e.g. anti-ice)
+- Applicable system status
+    - green light (e.g. APU available).
 
 You will see this philosophy demonstrated throughout the course.
 
@@ -83,7 +85,7 @@ Just below the ECAM screens, on the pedestal, is a switching panel for use in ab
 
 ![alt text](image-8.png)
 
-In front of each pilot there are two attention getters, a red master warning, and anamber master caution. As a further means of getting the pilots' attention, there is a loudspeaker on each side of the cockpit for aural alerts and voice messages.
+In front of each pilot there are two attention getters, a red master warning, and an amber master caution. As a further means of getting the pilots' attention, there is a loudspeaker on each side of the cockpit for aural alerts and voice messages.
 
 Note: The loudspeakers can also be used to listen to ATC and the intercom.
 

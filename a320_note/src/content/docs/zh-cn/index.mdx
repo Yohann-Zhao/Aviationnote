@@ -1,27 +1,42 @@
 ﻿---
 banner:
   content: |
-    本站正在开发中... <a href="https://yohannzhao.netlify.app/"> 关于我 </a>
-title: 欢迎阅读
-description: 开始通过我的笔记学习 A320 CBT 视频内容
+    本站正在开发中。部分内容尚未完成。当前仅支持英文原版
+title: 欢迎阅读！
+description: A320CBT学习笔记
 hero:
-  tagline: 恭喜你开始学习 A320 的相关内容！
+  tagline: 让我们一起学习A320的系统知识
   image:
     file: ../../../assets/images/airbus-cover.png
   actions:
     - text: 开始学习
-      link: aircraft_general/aircraft_general
+      link: /aircraft_general/aircraft_general
       icon: right-arrow
-    - text: 我的主页
-      link: https://yohannzhao.netlify.app/
+    - text: 更多资源
+      link: https://aviationnote.com/
       icon: external
       variant: minimal
 ---
 
-## 关于
-  本文档帮助我更高效地复习所有 CBT 内容，无需重复观看视频。我很高兴能将其免费分享给所有人。
+import { Card, CardGrid } from '@astrojs/starlight/components';
 
-## 来源
-  本文档基于网上可获取的免费 A320 CBT 资源，我通过逐个截图和转录视频内容来编写。
 
-  在我的学习中，我使用了这个 [YouTube 播放列表](https://www.youtube.com/playlist?list=PLKEybvo562LtwmnZOjo8jN7J75vXGqMzq)
+## 关于本站
+	这是A320 CBT视频的逐帧笔记集合。本文档旨在帮助更高效地复习CBT内容。
+
+## 参考
+	A320 CBT所有权利归原作者所有，本站内容基于互联网上免费可获取的CBT视频，通过截图和转录编辑了原始内容，仅用作学习交流之用。
+	例如：[YouTube播放列表](https://www.youtube.com/playlist?list=PLKEybvo562LtwmnZOjo8jN7J75vXGqMzq)
+
+<CardGrid stagger>
+	<Card title="更新信息" icon="pencil">
+		最后编辑日期：`5/5/2026`
+	</Card>
+	<Card title="更多资源" icon="open-book">
+		在[AviationNote](https://aviationnote.com/)中了解更多。目前，正在更新飞行学员培训的笔记和工具。
+	</Card>
+	<Card title="站点作者" icon="document">
+		本笔记站点的作者 - `Yuhan Zhao (Yohann)` - 是一位飞行学员。 
+		可在Yohann的[主页](https://yohannzhao.com/)了解更多。
+	</Card>
+</CardGrid>
