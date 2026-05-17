@@ -234,7 +234,7 @@ export default defineConfig({
 					collapsed: true,// 默认折叠
 					items: [
 						{ label: 'Lights System', translations: { 'zh-CN': '灯光系统' }, link: '/lights/lights_system' },
-						{ label: 'Lights Operation', translations: { 'zh-CN': '灯光操作' }, badge: { text: 'Incomplete', variant: 'caution' }, link: '/lights/lights_operation' },
+						{ label: 'Lights Operation', translations: { 'zh-CN': '灯光操作' }, link: '/lights/lights_operation' },
 					],
 				},
 				{
@@ -244,7 +244,7 @@ export default defineConfig({
 					},
 					collapsed: true,// 默认折叠
 					items: [
-						{ label: 'Ice & Rain Protection System', translations: { 'zh-CN': '防冰与防雨系统' }, badge: { text: 'Incomplete', variant: 'caution' }, link: '/ice_and_rain_protection/ice_and_rain_protection_system' },
+						{ label: 'Ice & Rain Protection System', translations: { 'zh-CN': '防冰与防雨系统' }, link: '/ice_and_rain_protection/ice_and_rain_protection_system' },
 					],
 				},
 				{
@@ -254,8 +254,8 @@ export default defineConfig({
 					},
 					collapsed: true,// 默认折叠
 					items: [
-						{ label: 'Communications System', translations: { 'zh-CN': '通信系统' }, badge: { text: 'Incomplete', variant: 'caution' }, link: '/communications/communications_system' },
-						{ label: 'Communications Operation', translations: { 'zh-CN': '通信操作' }, badge: { text: 'Incomplete', variant: 'caution' }, link: '/communications/communications_operation' },
+						{ label: 'Communications System', translations: { 'zh-CN': '通信系统' }, link: '/communications/communications_system' },
+						{ label: 'Communications Operation', translations: { 'zh-CN': '通信操作' }, link: '/communications/communications_operation' },
 					],
 				},
 				{
@@ -276,7 +276,7 @@ export default defineConfig({
 					},
 					collapsed: true,// 默认折叠
 					items: [
-						{ label: 'Flight Recorders System', translations: { 'zh-CN': '飞行记录器系统' }, badge: { text: 'Incomplete', variant: 'caution' }, link: '/flight_recorders/flight_recorders_system' },
+						{ label: 'Flight Recorders System', translations: { 'zh-CN': '飞行记录器系统' }, link: '/flight_recorders/flight_recorders_system' },
 					],
 				},
 				{
@@ -286,8 +286,8 @@ export default defineConfig({
 					},
 					collapsed: true,// 默认折叠
 					items: [
-						{ label: 'Oxygen System', translations: { 'zh-CN': '氧气系统' }, badge: { text: 'Incomplete', variant: 'caution' }, link: '/oxygen/oxygen_system' },
-						{ label: 'Oxygen Operation', translations: { 'zh-CN': '氧气操作' }, badge: { text: 'Incomplete', variant: 'caution' }, link: '/oxygen/oxygen_operation' },
+						{ label: 'Oxygen System', translations: { 'zh-CN': '氧气系统' }, link: '/oxygen/oxygen_system' },
+						{ label: 'Oxygen Operation', translations: { 'zh-CN': '氧气操作' }, link: '/oxygen/oxygen_operation' },
 					],
 				},
 				{
@@ -297,7 +297,7 @@ export default defineConfig({
 					},
 					collapsed: true,// 默认折叠
 					items: [
-						{ label: 'Fire Protection System', translations: { 'zh-CN': '防火系统' }, badge: { text: 'Incomplete', variant: 'caution' }, link: '/fire_protection/fire_protection_system' },
+						{ label: 'Fire Protection System', translations: { 'zh-CN': '防火系统' }, link: '/fire_protection/fire_protection_system' },
 					],
 				}
 			],
